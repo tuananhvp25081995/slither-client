@@ -7,7 +7,7 @@ import { Util } from '../utils'
 import config from '../config'
 import Sync from '../network/Sync'
 
-export default class extends Phaser.State {
+export default class extends Phaser.Scene {
   init () {
     this.game.desiredFps = 45
     this.game.sound.mute = config.muteSound
@@ -29,10 +29,10 @@ export default class extends Phaser.State {
       this.game.world.width, this.game.world.height, 'background')
 
     // init physics & groups
-    this.game.physics.startSystem(Phaser.Physics.P2JS)
+    // this.game.physics.startSystem(Phaser.Physics.P2JS)
     this.foodGroup = this.game.add.group()
-    this.snakeHeadCollisionGroup = this.game.physics.p2.createCollisionGroup()
-    this.foodCollisionGroup = this.game.physics.p2.createCollisionGroup()
+    // this.snakeHeadCollisionGroup = this.game.physics.p2.createCollisionGroup()
+    // this.foodCollisionGroup = this.game.physics.p2.createCollisionGroup()
 
     // add food randomly
     for (let i = 0; i < 100; i++) {

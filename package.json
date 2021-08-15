@@ -49,6 +49,7 @@
         "cordova-plugin-whitelist": "^1.3.5",
         "firebase": "^8.8.1",
         "idiom.js": "^1.0.1",
+        "phaser": "^3.55.2",
         "phaser-ce": "^2.18.0",
         "webfontloader": "^1.6.28"
     },

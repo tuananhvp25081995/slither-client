@@ -3,7 +3,7 @@ import EyePair from './EyePair'
 import Shadow from './Shadow'
 import { Util } from '../utils'
 
-export default class extends Phaser.Sprite {
+export default class extends Phaser.GameObjects.Sprite {
   constructor (game, spriteKey, x, y) {
     super(game, x, y, spriteKey)
     // this.anchor.setTo(0.5)
@@ -26,7 +26,7 @@ export default class extends Phaser.Sprite {
     this.rotationSpeed = 40
 
     // init
-    this.collisionGroup = this.game.physics.p2.createCollisionGroup()
+    // this.collisionGroup = this.game.physics.p2.createCollisionGroup()
     this.sections = []
 
     this.headPath = []
@@ -61,7 +61,7 @@ export default class extends Phaser.Sprite {
     this.edge = this.game.add.sprite(x, y - this.edgeOffset, this.spriteKey)
     this.edge.name = 'edge'
     this.edge.alpha = 0
-    this.game.physics.p2.enable(this.edge, this.debug)
+    // this.game.physics.p2.enable(this.edge, this.debug)
     this.edge.body.setCircle(this.edgeOffset)
 
     // constrain edge to the front of the head
@@ -89,7 +89,7 @@ export default class extends Phaser.Sprite {
   addSectionAtPosition (x, y) {
     // init new section
     const sec = this.game.add.sprite(x, y, this.spriteKey)
-    this.game.physics.p2.enable(sec, this.debug)
+    // this.game.physics.p2.enable(sec, this.debug)
     sec.body.setCollisionGroup(this.collisionGroup)
     sec.body.collides([])
     sec.body.kinematic = true
@@ -243,13 +243,13 @@ export default class extends Phaser.Sprite {
     for (let i = 0; i < this.sections.length; i++) {
       const sec = this.sections[i]
       sec.scale.setTo(this.scale)
-      sec.body.data.shapes[0].radius = this.game.physics.p2.pxm(sec.width * 0.5)
+      // sec.body.data.shapes[0].radius = this.game.physics.p2.pxm(sec.width * 0.5)
     }
 
     // update edge lock location with p2 physics
-    this.edgeLock.localOffsetB = [
-      0, this.game.physics.p2.pxm(this.head.width * 0.5 + this.edgeOffset)
-    ]
+    // this.edgeLock.localOffsetB = [
+    //   0, this.game.physics.p2.pxm(this.head.width * 0.5 + this.edgeOffset)
+    // ]
 
     this.eyes.setScale(scale)
   }
@@ -278,7 +278,7 @@ export default class extends Phaser.Sprite {
       }
     }
 
-    this.game.physics.p2.removeConstraint(this.edgeLock)
+    // this.game.physics.p2.removeConstraint(this.edgeLock)
     this.edge.destroy()
 
     // destroy food that is constrained to the snake head
