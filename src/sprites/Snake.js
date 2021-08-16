@@ -4,7 +4,7 @@ import Shadow from './Shadow'
 import { Util } from '../utils'
 
 export default class extends Phaser.Sprite {
-  constructor (game, spriteKey, x, y) {
+  constructor(game, spriteKey, x, y) {
     super(game, x, y, spriteKey)
     // this.anchor.setTo(0.5)
 
@@ -72,7 +72,7 @@ export default class extends Phaser.Sprite {
     this.edge.body.onBeginContact.add(this.edgeContact, this)
   }
 
-  edgeContact (phaserBody) {
+  edgeContact(phaserBody) {
     // if the edge hits another snake's section, destroy this snake
     if (phaserBody && this.sections.indexOf(phaserBody.sprite) == -1) {
       this.destroy()
@@ -86,7 +86,7 @@ export default class extends Phaser.Sprite {
     }
   }
 
-  addSectionAtPosition (x, y) {
+  addSectionAtPosition(x, y) {
     // init new section
     const sec = this.game.add.sprite(x, y, this.spriteKey)
     this.game.physics.p2.enable(sec, this.debug)
@@ -111,7 +111,7 @@ export default class extends Phaser.Sprite {
     return sec
   }
 
-  initSections (num) {
+  initSections(num) {
     for (let i = 1; i <= num; i++) {
       const x = this.head.body.x
       const y = this.head.body.y + i * this.preferredDistance
@@ -121,11 +121,11 @@ export default class extends Phaser.Sprite {
     }
   }
 
-  addSectionsAfterLast (amount) {
+  addSectionsAfterLast(amount) {
     this.queuedSections += amount
   }
 
-  update () {
+  update() {
     const speed = this.speed
     this.head.body.moveForward(speed)
 
@@ -167,7 +167,7 @@ export default class extends Phaser.Sprite {
     let i = 0
     let found = false
     while (this.headPath[i].x !== this.sections[1].body.x &&
-     this.headPath[i].y !== this.sections[1].body.y) {
+      this.headPath[i].y !== this.sections[1].body.y) {
       if (this.headPath[i].x === this.lastHeadPosition.x &&
         this.headPath[i].y === this.lastHeadPosition.y) {
         found = true
@@ -187,7 +187,7 @@ export default class extends Phaser.Sprite {
     this.shadow.update()
   }
 
-  findNextPointIndex (currentIndex) {
+  findNextPointIndex(currentIndex) {
     // const pt = this.headPath[currentIndex]
     // we are trying to find a point at approximately this distance away
     // from the point before it, where the distance is the total length of
@@ -227,7 +227,7 @@ export default class extends Phaser.Sprite {
    * Called each time the snake's second section reaches where the
    * first section was at the last call (completed a single cycle)
    */
-  onCycleComplete () {
+  onCycleComplete() {
     if (this.queuedSections > 0) {
       const lastSec = this.sections[this.sections.length - 1]
       this.addSectionAtPosition(lastSec.body.x, lastSec.body.y)
@@ -235,7 +235,7 @@ export default class extends Phaser.Sprite {
     }
   }
 
-  setScale (scale) {
+  setScale(scale) {
     this.scale = scale
     this.preferredDistance = 17 * this.scale
 
@@ -254,17 +254,17 @@ export default class extends Phaser.Sprite {
     this.eyes.setScale(scale)
   }
 
-  incrementSize () {
+  incrementSize() {
     this.addSectionsAfterLast(1)
     this.setScale(this.scale * 1.01)
   }
 
-  addDestroyedCallback (callback, context) {
+  addDestroyedCallback(callback, context) {
     this.onDestroyedCallbacks.push(callback)
     this.onDestroyedContexts.push(context)
   }
 
-  destroy () {
+  destroy() {
     this.game.snakes.splice(this.game.snakes.indexOf(this), 1)
     this.sections.forEach(function (sec, index) {
       sec.destroy()

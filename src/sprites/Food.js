@@ -1,5 +1,5 @@
 export default class {
-  constructor (game, x, y) {
+  constructor(game, x, y) {
     this.game = game
     this.debug = false
     this.sprite = this.game.add.sprite(x, y, 'food')
@@ -18,7 +18,8 @@ export default class {
     this.constraint = null
   }
 
-  onBeginContact (phaserBody, p2Body) {
+  onBeginContact(phaserBody, p2Body) {
+    // console.log(phaserBody)
     if (phaserBody && phaserBody.sprite.name == 'head' && this.constraint == null) {
       this.sprite.body.collides([])
 
@@ -33,17 +34,17 @@ export default class {
     }
   }
 
-  update () {
+  update() {
     // once the food reaches the center of the snake head, destroy it and
     // increment the size of the snake
     if (this.head && Math.round(this.head.body.x) == Math.round(this.sprite.body.x) &&
-    Math.round(this.head.body.y) == Math.round(this.sprite.body.y)) {
+      Math.round(this.head.body.y) == Math.round(this.sprite.body.y)) {
       this.head.snake.incrementSize()
       this.destroy()
     }
   }
 
-  destroy () {
+  destroy() {
     if (this.head) {
       this.game.physics.p2.removeConstraint(this.constraint)
       this.sprite.destroy()
