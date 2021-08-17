@@ -1,10 +1,12 @@
 import Phaser from "phaser";
+import PowerRune from "./PowerRune";
 let Ball;
 let Circle;
 
 export default class Boot extends Phaser.Scene {
     preload() {
         this.load.image("background", "assets/images/background.jpg");
+        this.load.image("food", "assets/images/food.png");
     }
 
     create() {
@@ -12,6 +14,7 @@ export default class Boot extends Phaser.Scene {
         const gameHeight = this.game.config.height;
         this.add.tileSprite(0, 0, gameWidth * 3, gameHeight * 3, "background");
 
+        // Ball
         Ball = this.add.circle(200, 300, 10, 0xffffff, 1);
         this.physics.add.existing(Ball);
         Ball.body.setCollideWorldBounds(true, 1, 1);
@@ -21,9 +24,12 @@ export default class Boot extends Phaser.Scene {
         this.cameras.main.height = gameHeight / 2;
         this.cameras.main.startFollow(Ball);
 
+        // Food;
+        let Food1 = new PowerRune(this, 200, 200, "food");
+        let Food2 = new PowerRune(this, 400, 400, "food");
+
         // create Circle
         Circle = this.add.graphics().lineStyle(5, 0x00ffff);
-
         this.physics.add.existing(Circle);
         Circle.body.allowGravity = false;
         Circle.body.setCircle(gameWidth / 4);
