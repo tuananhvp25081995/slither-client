@@ -37,7 +37,8 @@ export default class extends Phaser.GameObjects.Sprite {
 
         this.sectionGroup = this.scene.physics.add.group();
 
-        // this.scene.add.existing(this.sectionGroup);
+        // this.sectionGroup = this.scene.add.container();
+        // this.scene.physics.add.existing(this.sectionGroup);
 
         // add the head of the snake
         this.head = this.addSectionAtPosition(x, y);
@@ -110,7 +111,6 @@ export default class extends Phaser.GameObjects.Sprite {
         this.sectionGroup.add(sec);
         // this.sectionGroup.sendToBack(sec);
         sec.setScale(this.scale);
-
         this.sections.push(sec);
 
         // add circle
