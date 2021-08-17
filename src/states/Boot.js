@@ -4,6 +4,8 @@ import { Util } from "../utils";
 let Ball;
 let Circle;
 let Food1;
+var healthGroup;
+let plusRunes;
 export default class Boot extends Phaser.Scene {
     preload() {
         this.load.image("background", "assets/images/background.jpg");
@@ -27,9 +29,30 @@ export default class Boot extends Phaser.Scene {
         this.cameras.main.height = gameHeight / 2;
         this.cameras.main.startFollow(Ball);
 
-        Food1 = new PowerRune(this, 400, 400, "plus");
-        // let Food2 = new PowerRune(this, 400, 400, "food");
+        plusRunes = new PowerRune(this, Ball, 'plus', 10, { x: 50, y: 50 }, { x: 750, y: 550 });
+        //  When the player sprite his the health packs, call this function ...
+        this.physics.add.overlap(Ball, plusRunes.healthGroup, plusRunes.spriteHitHealth());
+        //
+        // healthGroup = this.physics.add.staticGroup({
+        //     key: 'plus',
+        //     frameQuantity: 10,
+        //     immovable: true
+        // });
 
+        // var children = healthGroup.getChildren();
+
+        // for (var i = 0; i < children.length; i++) {
+        //     var x = Phaser.Math.Between(50, 750);
+        //     var y = Phaser.Math.Between(50, 550);
+
+        //     children[i].setPosition(x, y);
+        // }
+
+        // healthGroup.refresh();
+        // //  When the player sprite his the health packs, call this function ...
+        // this.physics.add.overlap(Ball, healthGroup, this.spriteHitHealth);
+        // 
+        console.log(this.health);
         // create Circle
         Circle = this.add.graphics().lineStyle(5, 0x00ffff);
         this.physics.add.existing(Circle);
@@ -41,16 +64,6 @@ export default class Boot extends Phaser.Scene {
             Circle.body.halfHeight,
             Circle.body.radius
         );
-        console.log(this, 100);
-        console.log(Ball);
-        // for (let i = 0; i < 100; i++) {
-        //     this.initRune(
-        //         this,
-        //         Util.randomInt(-Circle.body.width, Circle.body.width),
-        //         Util.randomInt(-Circle.body.height, Circle.body.height),
-        //         "plus"
-        //     );
-        // }
         // Resize Circle
         const circleBorderConfig = {
             delay: 5000,
@@ -75,21 +88,10 @@ export default class Boot extends Phaser.Scene {
 
         this.time.addEvent(circleBorderConfig);
     }
-    initRune(scene, x, y, type) {
-        let rune = new PowerRune(scene, x, y, type);
-        return rune;
+    spriteHitHealth(sprite, health) {
+        plusRunes.healthGroup.killAndHide(health);
     }
-    onCollideRune(item1, item2) {
-        const overlap = this.physics.world.overlap(item1, item2)
-        console.log(overlap);
-        if (overlap) {
-            console.log('true');
-        }
-    }
-
     update(delta) {
-        console.log(Food1);
-        this.onCollideRune(Food1, Ball);
         const angle = Phaser.Math.Angle.Between(
             Ball.x,
             Ball.y,
