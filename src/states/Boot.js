@@ -6,6 +6,7 @@ let Circle;
 let Food1;
 var healthGroup;
 let plusRunes;
+let foodGroup;
 export default class Boot extends Phaser.Scene {
     preload() {
         this.load.image("background", "assets/images/background.jpg");
@@ -29,30 +30,44 @@ export default class Boot extends Phaser.Scene {
         this.cameras.main.height = gameHeight / 2;
         this.cameras.main.startFollow(Ball);
 
-        plusRunes = new PowerRune(this, Ball, 'plus', 10, { x: -100, y: -100 }, { x: 750, y: 550 });
+        // plusRunes = new PowerRune(this, Ball, 'plus', 10, { x: -100, y: -100 }, { x: 750, y: 550 });
         //  When the player sprite his the health packs, call this function ...
-        this.physics.add.overlap(Ball, plusRunes.healthGroup, plusRunes.spriteHitHealth());
+        // this.physics.add.overlap(Ball, plusRunes.healthGroup, plusRunes.spriteHitHealth());
         //
-        // healthGroup = this.physics.add.staticGroup({
-        //     key: 'plus',
-        //     frameQuantity: 10,
-        //     immovable: true
-        // });
+        foodGroup = this.physics.add.staticGroup({
+            key: 'food',
+            frameQuantity: 100,
+            immovable: true,
+            // setScale: { x: 0.1, y: 0.1 }
+        });
+        healthGroup = this.physics.add.staticGroup({
+            key: 'plus',
+            frameQuantity: 10,
+            immovable: true,
+            setScale: { x: 0.1, y: 0.1 }
+        });
 
-        // var children = healthGroup.getChildren();
 
-        // for (var i = 0; i < children.length; i++) {
-        //     var x = Phaser.Math.Between(50, 750);
-        //     var y = Phaser.Math.Between(50, 550);
+        let children = healthGroup.getChildren();
+        let childrenFood = foodGroup.getChildren();
+        for (var i = 0; i < children.length; i++) {
+            var x = Phaser.Math.Between(200, 550);
+            var y = Phaser.Math.Between(200, 850);
 
-        //     children[i].setPosition(x, y);
-        // }
+            childrenFood[i].setPosition(x, y);
+        }
+        for (var i = 0; i < children.length; i++) {
+            var x = Phaser.Math.Between(1000, 1750);
+            var y = Phaser.Math.Between(1000, 1550);
 
-        // healthGroup.refresh();
-        // //  When the player sprite his the health packs, call this function ...
-        // this.physics.add.overlap(Ball, healthGroup, this.spriteHitHealth);
-        // 
-        console.log(this.health);
+            children[i].setPosition(x, y);
+        }
+
+        healthGroup.refresh();
+        foodGroup.refresh();
+        //  When the player sprite his the health packs, call this function ...
+        this.physics.add.overlap(Ball, foodGroup, this.spriteHitFood);
+        this.physics.add.overlap(Ball, healthGroup, this.spriteHitHealth);
         // create Circle
         Circle = this.add.graphics().lineStyle(5, 0x00ffff);
         this.physics.add.existing(Circle);
@@ -89,7 +104,10 @@ export default class Boot extends Phaser.Scene {
         this.time.addEvent(circleBorderConfig);
     }
     spriteHitHealth(sprite, health) {
-        plusRunes.healthGroup.killAndHide(health);
+        healthGroup.killAndHide(health);
+    }
+    spriteHitFood(sprite, health) {
+        foodGroup.killAndHide(health);
     }
     update(delta) {
         const angle = Phaser.Math.Angle.Between(
