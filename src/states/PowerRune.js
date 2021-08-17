@@ -12,9 +12,9 @@ export default class {
         this.healthGroup = this.scene.physics.add.staticGroup({
             key: type,
             frameQuantity: amount,
-            immovable: true
+            immovable: true,
+            setScale: { x: 0.1, y: 0.1 }
         });
-
         let children = this.healthGroup.getChildren();
         for (let i = 0; i < children.length; i++) {
             let x = Phaser.Math.Between(min.x, max.x);
@@ -26,7 +26,7 @@ export default class {
         // this.scene.physics.add.overlap(snake, this.healthGroup, this.spriteHitHealth);
     }
     spriteHitHealth(health) {
-        healthGroup.killAndHide(health);
+        this.healthGroup.killAndHide(health);
         console.log(health);
     }
 }

@@ -29,7 +29,7 @@ export default class Boot extends Phaser.Scene {
         this.cameras.main.height = gameHeight / 2;
         this.cameras.main.startFollow(Ball);
 
-        plusRunes = new PowerRune(this, Ball, 'plus', 10, { x: 50, y: 50 }, { x: 750, y: 550 });
+        plusRunes = new PowerRune(this, Ball, 'plus', 10, { x: -100, y: -100 }, { x: 750, y: 550 });
         //  When the player sprite his the health packs, call this function ...
         this.physics.add.overlap(Ball, plusRunes.healthGroup, plusRunes.spriteHitHealth());
         //
