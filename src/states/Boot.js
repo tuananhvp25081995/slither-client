@@ -10,9 +10,9 @@ export default class Boot extends Phaser.Scene {
     create() {
         const gameWidth = this.game.config.width;
         const gameHeight = this.game.config.height;
-        this.add.tileSprite(0, 0, gameWidth * 3, gameHeight * 3, "background");
+        this.add.tileSprite(0, 0, gameWidth * 3, gameWidth * 3, "background");
 
-        Ball = this.add.circle(200, 300, 10, 0xffffff, 1);
+        Ball = this.add.circle(200, 300, 20, 0xffffff, 1);
         this.physics.add.existing(Ball);
         Ball.body.setCollideWorldBounds(true, 1, 1);
         Ball.body.setVelocity(200, 200);
@@ -20,6 +20,11 @@ export default class Boot extends Phaser.Scene {
         this.cameras.main.width = gameWidth / 2;
         this.cameras.main.height = gameHeight / 2;
         this.cameras.main.startFollow(Ball);
+
+        // minimap
+        let minimapSize = gameWidth/20;
+        this.minimap = this.cameras.add(this.cameras.main.width - minimapSize, this.cameras.main.height - minimapSize, minimapSize, minimapSize).setZoom(0.016);
+        this.minimap.setBackgroundColor(0xffffff);  
 
         // create Circle
         Circle = this.add.graphics().lineStyle(5, 0x00ffff);
@@ -99,5 +104,6 @@ export default class Boot extends Phaser.Scene {
         } else {
             Ball.body.setMaxVelocity(180);
         }
+ 
     }
 }
