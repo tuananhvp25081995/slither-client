@@ -105,9 +105,11 @@ export default class Boot extends Phaser.Scene {
     }
     spriteHitHealth(sprite, health) {
         healthGroup.killAndHide(health);
+        console.log('power rune')
     }
     spriteHitFood(sprite, health) {
         foodGroup.killAndHide(health);
+        console.log('food')
     }
     update(delta) {
         const angle = Phaser.Math.Angle.Between(
