@@ -1,25 +1,34 @@
 import Phaser from "phaser";
-let Ball;
+import Snake from "../sprites/Snake";
+let snake;
 let Circle;
 
 export default class Boot extends Phaser.Scene {
     preload() {
         this.load.image("background", "assets/images/background.jpg");
+        this.load.image("circle", "assets/images/circle.png");
     }
 
     create() {
+        this.game.snakes = [];
+        console.log(this);
+        snake = new Snake(this, 400, 400, "circle");
+        console.log(snake);
         const gameWidth = this.game.config.width;
         const gameHeight = this.game.config.height;
         this.add.tileSprite(0, 0, gameWidth * 3, gameHeight * 3, "background");
 
-        Ball = this.add.circle(200, 300, 10, 0xffffff, 1);
-        this.physics.add.existing(Ball);
-        Ball.body.setCollideWorldBounds(true, 1, 1);
-        Ball.body.setVelocity(200, 200);
-        console.log(this.physics);
+        let test = this.add.sprite(400, 400, "circle");
+
+        // snake = this.add.circle(200, 300, 10, 0xffffff, 1);
+        // this.physics.add.existing(snake);
+        // snake.body.setCollideWorldBounds(true, 1, 1);
+        // snake.body.setVelocity(200, 200);
+        this.game.playerSnake = snake;
+
         this.cameras.main.width = gameWidth / 2;
         this.cameras.main.height = gameHeight / 2;
-        this.cameras.main.startFollow(Ball);
+        this.cameras.main.startFollow(snake.head);
 
         // create Circle
         Circle = this.add.graphics().lineStyle(5, 0x00ffff);
@@ -34,7 +43,7 @@ export default class Boot extends Phaser.Scene {
             Circle.body.radius
         );
         console.log(Circle);
-        console.log(Ball);
+        console.log(snake);
 
         // Resize Circle
         const circleBorderConfig = {
@@ -62,27 +71,13 @@ export default class Boot extends Phaser.Scene {
     }
 
     update(delta) {
-        const angle = Phaser.Math.Angle.Between(
-            Ball.x,
-            Ball.y,
-            this.input.mousePointer.x,
-            this.input.mousePointer.y
-        );
-        Ball.setRotation(angle + Math.PI / 2);
-        if (this.input.mousePointer) {
-            // this.physics.moveToObject(Ball, this.input, 240);
-            Ball.body.setVelocity(
-                this.input.mousePointer.x - Ball.x,
-                this.input.mousePointer.y - Ball.y
-            );
-            // this.physics.arcade.moveToPointer(Ball, 100)
-            // console.log(this.input.mousePointer.x, this.input.mousePointer.y)
-            // console.log(Ball.x, Ball.y)
+        for (let i = this.game.snakes.length - 1; i >= 0; i--) {
+            this.game.snakes[i].update();
         }
 
-        const overlap = this.physics.world.overlap(Circle, Ball);
+        const overlap = this.physics.world.overlap(Circle, snake.head);
         if (!overlap) {
-            let { x, y } = Ball.getCenter();
+            let { x, y } = snake.head.getCenter();
             if (Circle.body.halfWidth >= x) {
                 x = Math.abs(Circle.body.halfWidth - x) * 0.1 + x;
             } else {
@@ -93,11 +88,11 @@ export default class Boot extends Phaser.Scene {
             } else {
                 y = y - Math.abs(Circle.body.halfHeight - y) * 0.1;
             }
-            Ball.setPosition(x, y);
+            snake.head.setPosition(x, y);
 
-            Ball.body.setMaxVelocity(10);
+            snake.head.body.setMaxVelocity(10);
         } else {
-            Ball.body.setMaxVelocity(180);
+            snake.head.body.setMaxVelocity(800);
         }
     }
 }
