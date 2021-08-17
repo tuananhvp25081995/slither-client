@@ -8,10 +8,7 @@ const TerserPlugin = require('terser-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 // Phaser webpack config
-const phaserModule = path.join(__dirname, '/node_modules/phaser-ce/')
-const phaser = path.join(phaserModule, 'build/custom/phaser-split.js')
-const pixi = path.join(phaserModule, 'build/custom/pixi.js')
-const p2 = path.join(phaserModule, 'build/custom/p2.js')
+const phaser = path.join(__dirname, '/node_modules/phaser/')
 const mode = process.env.NODE_ENV || 'development'
 const prod = mode === 'production'
 const definePlugin = new webpack.DefinePlugin({
@@ -24,7 +21,7 @@ module.exports = {
       'babel-polyfill',
       path.resolve(__dirname, 'src/main.js')
     ],
-    vendor: ['pixi', 'p2', 'phaser', 'webfontloader']
+    vendor: ['phaser', 'webfontloader']
   },
   output: {
     pathinfo: true,
@@ -68,33 +65,12 @@ module.exports = {
   },
   module: {
     rules: [
-      { test: /\.js$/, use: ['babel-loader'], include: path.join(__dirname, 'src') },
-      {
-        test: /pixi\.js/,
-        loader: 'expose-loader',
-        options: {
-          exposes: {
-            globalName: 'PIXI',
-            override: true
-          }
-        }
-      },
       {
         test: /phaser-split\.js$/,
         loader: 'expose-loader',
         options: {
           exposes: {
             globalName: 'Phaser',
-            override: true
-          }
-        }
-      },
-      {
-        test: /p2\.js/,
-        loader: 'expose-loader',
-        options: {
-          exposes: {
-            globalName: 'p2',
             override: true
           }
         }
@@ -124,9 +100,7 @@ module.exports = {
   },
   resolve: {
     alias: {
-      phaser: phaser,
-      pixi: pixi,
-      p2: p2
+      phaser: phaser
     },
     fallback: {
       fs: 'empty',
