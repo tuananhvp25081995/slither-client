@@ -1,12 +1,16 @@
 import Phaser from "phaser";
 import PowerRune from "./PowerRune";
+import { Util } from "../utils";
 let Ball;
 let Circle;
-
+let Food1;
 export default class Boot extends Phaser.Scene {
     preload() {
         this.load.image("background", "assets/images/background.jpg");
         this.load.image("food", "assets/images/food.png");
+        this.load.image("plus", "assets/images/runes/plus.png");
+        this.load.image("star", "assets/images/runes/star.png");
+        this.load.image("heart", "assets/images/runes/heart.png");
     }
 
     create() {
@@ -19,14 +23,12 @@ export default class Boot extends Phaser.Scene {
         this.physics.add.existing(Ball);
         Ball.body.setCollideWorldBounds(true, 1, 1);
         Ball.body.setVelocity(200, 200);
-        console.log(this.physics);
         this.cameras.main.width = gameWidth / 2;
         this.cameras.main.height = gameHeight / 2;
         this.cameras.main.startFollow(Ball);
 
-        // Food;
-        let Food1 = new PowerRune(this, 200, 200, "food");
-        let Food2 = new PowerRune(this, 400, 400, "food");
+        Food1 = new PowerRune(this, 400, 400, "plus");
+        // let Food2 = new PowerRune(this, 400, 400, "food");
 
         // create Circle
         Circle = this.add.graphics().lineStyle(5, 0x00ffff);
@@ -39,9 +41,16 @@ export default class Boot extends Phaser.Scene {
             Circle.body.halfHeight,
             Circle.body.radius
         );
-        console.log(Circle);
+        console.log(this, 100);
         console.log(Ball);
-
+        // for (let i = 0; i < 100; i++) {
+        //     this.initRune(
+        //         this,
+        //         Util.randomInt(-Circle.body.width, Circle.body.width),
+        //         Util.randomInt(-Circle.body.height, Circle.body.height),
+        //         "plus"
+        //     );
+        // }
         // Resize Circle
         const circleBorderConfig = {
             delay: 5000,
@@ -66,8 +75,21 @@ export default class Boot extends Phaser.Scene {
 
         this.time.addEvent(circleBorderConfig);
     }
+    initRune(scene, x, y, type) {
+        let rune = new PowerRune(scene, x, y, type);
+        return rune;
+    }
+    onCollideRune(item1, item2) {
+        const overlap = this.physics.world.overlap(item1, item2)
+        console.log(overlap);
+        if (overlap) {
+            console.log('true');
+        }
+    }
 
     update(delta) {
+        console.log(Food1);
+        this.onCollideRune(Food1, Ball);
         const angle = Phaser.Math.Angle.Between(
             Ball.x,
             Ball.y,
