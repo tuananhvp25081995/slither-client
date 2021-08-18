@@ -110,7 +110,7 @@ export default class extends Phaser.GameObjects.Sprite {
 
     this.snakeLength++
     this.sectionGroup.add(sec)
-    // this.sectionGroup.sendToBack(sec);
+    this.sectionGroup.sendToBack(sec)
     sec.setScale(this.scale)
     this.sections.push(sec)
 

@@ -25,12 +25,13 @@ export default class Boot extends Phaser.Scene {
   }
 
   create () {
+    // Always add map first. Everything else is added after map.
     const gameWidth = this.game.config.width
     const gameHeight = this.game.config.height
     this.add.tileSprite(0, 0, gameWidth * 3, gameHeight * 3, 'background')
 
+    // Init Snake
     this.game.snakes = []
-
     snake = new Snake(this, 0, 0, 'circle')
     this.game.playerSnake = snake
     this.cameras.main.width = gameWidth / 2
