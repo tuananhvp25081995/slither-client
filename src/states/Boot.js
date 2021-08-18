@@ -1,7 +1,7 @@
 import Phaser from 'phaser'
 import PowerRune from './PowerRune'
 import { Util } from '../utils'
-import Slot from '../sprites/Slots'
+
 let Ball
 let Circle
 let Food1
