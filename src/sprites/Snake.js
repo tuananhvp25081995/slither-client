@@ -88,13 +88,12 @@ export default class extends Phaser.GameObjects.Sprite {
 
   edgeContact (phaserBody) {
     // if the edge hits another snake's section, destroy this snake
-    if (phaserBody && this.sections.indexOf(phaserBody.sprite) == -1) {
+    if (phaserBody && this.sections.indexOf(phaserBody.sprite) === -1) {
       this.destroy()
-    }
-    // if the edge hits this snake's own section, a simple solution to avoid
-    // glitches is to move the edge to the center of the head, where it
-    // will then move back to the front because of the lock constraint
-    else if (phaserBody) {
+    } else if (phaserBody) {
+      // if the edge hits this snake's own section, a simple solution to avoid
+      // glitches is to move the edge to the center of the head, where it
+      // will then move back to the front because of the lock constraint
       this.edge.body.x = this.head.body.x
       this.edge.body.y = this.head.body.y
     }
@@ -121,7 +120,6 @@ export default class extends Phaser.GameObjects.Sprite {
 
     // add shadow
     // this.shadow.add(x, y);
-
     return sec
   }
 
@@ -140,23 +138,23 @@ export default class extends Phaser.GameObjects.Sprite {
   }
 
   update () {
-    const angle = Phaser.Math.Angle.Between(
-      this.head.x,
-      this.head.y,
-      this.scene.input.mousePointer.x,
-      this.scene.input.mousePointer.y
-    )
-    this.head.setRotation(angle + Math.PI / 2)
-    if (this.scene.input.mousePointer) {
-      // this.physics.moveToObject(this, this.scene.input, 240);
-      this.head.body.setVelocity(
-        this.scene.input.mousePointer.x - this.head.x,
-        this.scene.input.mousePointer.y - this.head.y
-      )
-      // this.physics.arcade.moveToPointer(snake, 100)
-      // console.log(this.scene.input.mousePointer.x, this.scene.input.mousePointer.y)
-      // console.log(snake.x, snake.y)
-    }
+    // const angle = Phaser.Math.Angle.Between(
+    //   this.head.x,
+    //   this.head.y,
+    //   this.scene.input.mousePointer.x,
+    //   this.scene.input.mousePointer.y
+    // )
+    // this.head.setRotation(angle + Math.PI / 2)
+    // if (this.scene.input.mousePointer) {
+    //   // this.physics.moveToObject(this, this.scene.input, 240);
+    //   this.head.body.setVelocity(
+    //     this.scene.input.mousePointer.x - this.head.x,
+    //     this.scene.input.mousePointer.y - this.head.y
+    //   )
+    //   // this.physics.arcade.moveToPointer(snake, 100)
+    //   // console.log(this.scene.input.mousePointer.x, this.scene.input.mousePointer.y)
+    //   // console.log(snake.x, snake.y)
+    // }
     // const speed = this.speed;
     // this.head.body.moveForward(speed);
 
@@ -173,7 +171,7 @@ export default class extends Phaser.GameObjects.Sprite {
       this.sections[i].body.y = this.headPath[index].y
 
       // hide sections if they are at same pos
-      if (lastIndex && index == lastIndex) {
+      if (lastIndex && index === lastIndex) {
         this.sections[i].alpha = 0
       } else {
         this.sections[i].alpha = 1
@@ -285,14 +283,14 @@ export default class extends Phaser.GameObjects.Sprite {
       sec.scale.setTo(this.scale)
       // sec.body.data.shapes[0].radius = this.scene.physics.p2.pxm(sec.width * 0.5)
     }
-
-    // update edge lock location with p2 physics
-    // this.edgeLock.localOffsetB = [
-    //   0, this.scene.physics.p2.pxm(this.head.width * 0.5 + this.edgeOffset)
-    // ]
-
-    // this.eyes.setScale(scale);
   }
+
+  // update edge lock location with p2 physics
+  // this.edgeLock.localOffsetB = [
+  //   0, this.scene.physics.p2.pxm(this.head.width * 0.5 + this.edgeOffset)
+  // ]
+
+  // this.eyes.setScale(scale);
 
   incrementSize () {
     this.addSectionsAfterLast(1)
@@ -319,17 +317,9 @@ export default class extends Phaser.GameObjects.Sprite {
         )
       }
     }
-
     // this.scene.physics.p2.removeConstraint(this.edgeLock)
     this.edge.destroy()
-
-    // destroy food that is constrained to the snake head
-    for (let i = this.food.length - 1; i >= 0; i--) {
-      this.food[i].destroy()
-    }
-
     // this.eyes.destroy();
-
     // this.shadow.destroy();
   }
 }

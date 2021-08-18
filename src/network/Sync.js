@@ -1,7 +1,7 @@
 import firebase from 'firebase'
 
 export default class {
-  constructor (game) {
+  constructor(game) {
     this.game = game
     // Initialize Firebase
     const config = {
@@ -20,7 +20,7 @@ export default class {
       .catch((error) => {
         const errorCode = error.code
         const errorMessage = error.message
-        console.log(errorCode, errorMessage)
+        // console.log(errorCode, errorMessage)
       })
     firebase.auth().onAuthStateChanged(firebaseUser => {
       if (firebaseUser) {
@@ -31,7 +31,7 @@ export default class {
     })
   }
 
-  loadData (uid) {
+  loadData(uid) {
     try {
       const rootRef = firebase.database().ref(`snake/${uid}`)
       rootRef.on('value', (snapshot) => {
@@ -45,7 +45,7 @@ export default class {
     }
   }
 
-  updatePos (mouseX, mouseY, snakeX, snakeY) {
+  updatePos(mouseX, mouseY, snakeX, snakeY) {
     const posData = {
       mouseX: mouseX,
       mouseY: mouseY,

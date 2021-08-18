@@ -3,6 +3,7 @@ import Phaser from 'phaser'
 import PlayerSnake from '../sprites/PlayerSnake'
 import BotSnake from '../sprites/BotSnake'
 import Food from '../sprites/Food'
+import PowerRunes from '../states/PowerRune'
 import { Util } from '../utils'
 import config from '../config'
 import Sync from '../network/Sync'
@@ -14,8 +15,7 @@ export default class extends Phaser.Scene {
     this.sync = new Sync(this.game)
   }
 
-  preload () {
-  }
+  preload () {}
 
   create () {
     const width = this.game.width
@@ -25,8 +25,13 @@ export default class extends Phaser.Scene {
     this.game.stage.backgroundColor = '#444'
 
     // add background
-    this.game.add.tileSprite(-width, -height,
-      this.game.world.width, this.game.world.height, 'background')
+    this.game.add.tileSprite(
+      -width,
+      -height,
+      this.game.world.width,
+      this.game.world.height,
+      'background'
+    )
 
     // init physics & groups
     // this.game.physics.startSystem(Phaser.Physics.P2JS)
@@ -36,7 +41,17 @@ export default class extends Phaser.Scene {
 
     // add food randomly
     for (let i = 0; i < 100; i++) {
-      this.initFood(Util.randomInt(-width, width), Util.randomInt(-height, height))
+      this.initFood(
+        Util.randomInt(-width, width),
+        Util.randomInt(-height, height)
+      )
+    }
+    for (let i = 0; i < 100; i++) {
+      this.initRunePlus(
+        Util.randomInt(-width, width),
+        Util.randomInt(-height, height),
+        'plus'
+      )
     }
 
     this.game.snakes = []
@@ -47,14 +62,54 @@ export default class extends Phaser.Scene {
     this.game.camera.follow(snake.head)
 
     // create bots
-    new BotSnake(this.game, 'atom-circle', Util.randomInt(-width, width), Util.randomInt(-height, height))
-    new BotSnake(this.game, 'orange-circle', Util.randomInt(-width, width), Util.randomInt(-height, height))
-    new BotSnake(this.game, 'yellow-gradient-circle', Util.randomInt(-width, width), Util.randomInt(-height, height))
-    new BotSnake(this.game, 'green-circle', Util.randomInt(-width, width), Util.randomInt(-height, height))
-    new BotSnake(this.game, 'green-circle', Util.randomInt(-width, width), Util.randomInt(-height, height))
-    new BotSnake(this.game, 'atom-circle', Util.randomInt(-width, width), Util.randomInt(-height, height))
-    new BotSnake(this.game, 'orange-circle', Util.randomInt(-width, width), Util.randomInt(-height, height))
-    new BotSnake(this.game, 'yellow-gradient-circle', Util.randomInt(-width, width), Util.randomInt(-height, height))
+    new BotSnake(
+      this.game,
+      'atom-circle',
+      Util.randomInt(-width, width),
+      Util.randomInt(-height, height)
+    )
+    new BotSnake(
+      this.game,
+      'orange-circle',
+      Util.randomInt(-width, width),
+      Util.randomInt(-height, height)
+    )
+    new BotSnake(
+      this.game,
+      'yellow-gradient-circle',
+      Util.randomInt(-width, width),
+      Util.randomInt(-height, height)
+    )
+    new BotSnake(
+      this.game,
+      'green-circle',
+      Util.randomInt(-width, width),
+      Util.randomInt(-height, height)
+    )
+    new BotSnake(
+      this.game,
+      'green-circle',
+      Util.randomInt(-width, width),
+      Util.randomInt(-height, height)
+    )
+    new BotSnake(
+      this.game,
+      'atom-circle',
+      Util.randomInt(-width, width),
+      Util.randomInt(-height, height)
+    )
+    new BotSnake(
+      this.game,
+      'orange-circle',
+      Util.randomInt(-width, width),
+      Util.randomInt(-height, height)
+    )
+    new BotSnake(
+      this.game,
+      'yellow-gradient-circle',
+      Util.randomInt(-width, width),
+      Util.randomInt(-height, height)
+    )
 
     // initialize snake groups and collision
     for (let i = 0; i < this.game.snakes.length; i++) {
@@ -65,7 +120,11 @@ export default class extends Phaser.Scene {
       snake.addDestroyedCallback(this.snakeDestroyed, this)
     }
 
-    this.game.time.events.loop(Phaser.Timer.SECOND, this.updatePosition, this)
+    this.game.time.events.loop(
+      Phaser.Timer.SECOND,
+      this.updatePosition,
+      this
+    )
   }
 
   updatePosition () {
@@ -85,10 +144,21 @@ export default class extends Phaser.Scene {
     return f
   }
 
+  initRunePlus (x, y, type) {
+    const rune = new PowerRunes(this.game, x, y, type)
+    rune.sprite.body.setCollisionGroup(this.foodCollisionGroup)
+    this.foodGroup.add(rune.sprite)
+    rune.sprite.body.collides([this.snakeHeadCollisionGroup])
+    return rune
+  }
+
   snakeDestroyed (snake) {
     // place food where snake was destroyed
-    for (let i = 0; i < snake.headPath.length;
-      i += Math.round(snake.headPath.length / snake.snakeLength) * 2) {
+    for (
+      let i = 0;
+      i < snake.headPath.length;
+      i += Math.round(snake.headPath.length / snake.snakeLength) * 2
+    ) {
       this.initFood(
         snake.headPath[i].x + Util.randomInt(-10, 10),
         snake.headPath[i].y + Util.randomInt(-10, 10)
@@ -106,6 +176,8 @@ export default class extends Phaser.Scene {
       const f = this.foodGroup.children[i]
       f.food.update()
     }
+    // const rune = new PowerRunes;
+    // rune.update();
   }
 
   render () {
