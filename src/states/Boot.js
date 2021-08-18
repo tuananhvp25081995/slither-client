@@ -15,6 +15,7 @@ export default class Boot extends Phaser.Scene {
     this.load.image('plus', 'assets/images/runes/plus.png')
     this.load.image('star', 'assets/images/runes/star.png')
     this.load.image('heart', 'assets/images/runes/heart.png')
+    this.load.image('rectangle', 'assets/images/Rectangle.png')
   }
 
   create () {
@@ -107,9 +108,12 @@ export default class Boot extends Phaser.Scene {
 
     this.time.addEvent(circleBorderConfig)
 
-    this.slot = this.add.rectangle(this.cameras.main.width - 250, 100, 500, 200, 0x6666ff);
+    this.slot = this.add.image(this.cameras.main.width, 0, 'rectangle');
+    this.slot.setPosition(this.cameras.main.width - this.slot.width/2, this.slot.height/2)
     this.slot.setScrollFactor(0, 0);
-    
+
+    this.minimap.ignore(this.slot)
+
     this.rightClick(this.slot);
   }
 
