@@ -1,6 +1,9 @@
 import Phaser from 'phaser'
 import Snake from '../sprites/Snake'
+import PowerRune from './PowerRune'
+import { Util } from '../utils'
 let snake
+let Ball
 let Circle
 let healthGroup
 let foodGroup
@@ -17,6 +20,7 @@ export default class Boot extends Phaser.Scene {
     this.load.image('plus', 'assets/images/runes/plus.png')
     this.load.image('star', 'assets/images/runes/star.png')
     this.load.image('heart', 'assets/images/runes/heart.png')
+    this.load.image('rectangle', 'assets/images/Rectangle.png')
     this.load.image('circle', 'assets/images/circle.png')
   }
 
@@ -109,6 +113,24 @@ export default class Boot extends Phaser.Scene {
     }
 
     this.time.addEvent(circleBorderConfig)
+
+    this.slot = this.add.image(this.cameras.main.width, 0, 'rectangle')
+    this.slot.setPosition(this.cameras.main.width - this.slot.width / 2, this.slot.height / 2)
+    this.slot.setScrollFactor(0, 0)
+
+    this.minimap.ignore(this.slot)
+
+    this.rightClick(this.slot)
+  }
+
+  rightClick (slot) {
+    this.input.mouse.disableContextMenu()
+
+    this.input.on('pointerdown', function (pointer) {
+      if (pointer.rightButtonDown()) {
+        slot.visible = !slot.visible
+      }
+    })
   }
 
   spriteHitHealth (sprite, health) {
