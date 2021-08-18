@@ -1,12 +1,14 @@
 import Phaser from 'phaser'
-import PowerRune from './PowerRune'
-import { Util } from '../utils'
 let Ball
 let Circle
-let Food1
 let healthGroup
-let plusRunes
 let foodGroup
+const SPEED = 400
+const ROTATION_SPEED = 1 * Math.PI
+const ROTATION_SPEED_DEGREES = Phaser.Math.RadToDeg(ROTATION_SPEED)
+const TOLERANCE = 0.02 * ROTATION_SPEED
+
+const velocityFromRotation = Phaser.Physics.Arcade.ArcadePhysics.prototype.velocityFromRotation
 export default class Boot extends Phaser.Scene {
   preload () {
     this.load.image('background', 'assets/images/background.jpg')
@@ -14,6 +16,7 @@ export default class Boot extends Phaser.Scene {
     this.load.image('plus', 'assets/images/runes/plus.png')
     this.load.image('star', 'assets/images/runes/star.png')
     this.load.image('heart', 'assets/images/runes/heart.png')
+    this.load.image('circle', 'assets/images/circle.png')
   }
 
   create () {
@@ -21,10 +24,8 @@ export default class Boot extends Phaser.Scene {
     const gameHeight = this.game.config.height
     this.add.tileSprite(0, 0, gameWidth * 3, gameWidth * 3, 'background')
 
-    Ball = this.add.circle(200, 300, 20, 0xffffff, 1)
-    this.physics.add.existing(Ball)
+    Ball = this.physics.add.image(200, 150, 'circle').setVelocity(SPEED, 0)
     Ball.body.setCollideWorldBounds(true, 1, 1)
-    Ball.body.setVelocity(200, 200)
     this.cameras.main.width = gameWidth / 2
     this.cameras.main.height = gameHeight / 2
     this.cameras.main.startFollow(Ball)
@@ -48,15 +49,15 @@ export default class Boot extends Phaser.Scene {
 
     const children = healthGroup.getChildren()
     const childrenFood = foodGroup.getChildren()
-    for (var i = 0; i < children.length; i++) {
-      var x = Phaser.Math.Between(200, 550)
-      var y = Phaser.Math.Between(200, 850)
+    for (let i = 0; i < children.length; i++) {
+      const x = Phaser.Math.Between(200, 550)
+      const y = Phaser.Math.Between(200, 850)
 
       childrenFood[i].setPosition(x, y)
     }
-    for (var i = 0; i < children.length; i++) {
-      var x = Phaser.Math.Between(1000, 1750)
-      var y = Phaser.Math.Between(1000, 1550)
+    for (let i = 0; i < children.length; i++) {
+      const x = Phaser.Math.Between(1000, 1750)
+      const y = Phaser.Math.Between(1000, 1550)
 
       children[i].setPosition(x, y)
     }
@@ -118,24 +119,26 @@ export default class Boot extends Phaser.Scene {
   }
 
   update (delta) {
-    const angle = Phaser.Math.Angle.Between(
-      Ball.x,
-      Ball.y,
-      this.input.mousePointer.x,
-      this.input.mousePointer.y
-    )
-    Ball.setRotation(angle + Math.PI / 2)
-    if (this.input.mousePointer) {
-      // this.physics.moveToObject(Ball, this.input, 240);
-      Ball.body.setVelocity(
-        this.input.mousePointer.x - Ball.x,
-        this.input.mousePointer.y - Ball.y
-      )
-      // this.physics.arcade.moveToPointer(Ball, 100)
-      // console.log(this.input.mousePointer.x, this.input.mousePointer.y)
-      // console.log(Ball.x, Ball.y)
-    }
-
+    // const angle = Phaser.Math.Angle.Between(
+    //   Ball.x,
+    //   Ball.y,
+    //   this.input.mousePointer.x,
+    //   this.input.mousePointer.y
+    // )
+    // Ball.setRotation(angle + Math.PI / 2)
+    // if (this.input.mousePointer) {
+    //   // this.physics.moveToObject(Ball, this.input, 240);
+    //   Ball.body.setVelocity(
+    //     this.input.mousePointer.x - Ball.x,
+    //     this.input.mousePointer.y - Ball.y
+    //   )
+    //   // this.physics.arcade.moveToPointer(Ball, 100)
+    //   // console.log(this.input.mousePointer.x, this.input.mousePointer.y)
+    //   // console.log(Ball.x, Ball.y)
+    // }
+    pointerMove(this.input.activePointer)
+    velocityFromRotation(Ball.rotation, SPEED, Ball.body.velocity)
+    Ball.body.debugBodyColor = (Ball.body.angularVelocity === 0) ? 0xff0000 : 0xffff00
     const overlap = this.physics.world.overlap(Circle, Ball)
     if (!overlap) {
       let { x, y } = Ball.getCenter()
@@ -155,5 +158,22 @@ export default class Boot extends Phaser.Scene {
     } else {
       Ball.body.setMaxVelocity(180)
     }
+  }
+}
+
+function pointerMove (pointer) {
+  // if (!pointer.manager.isOver) return;
+
+  // Also see alternative method in
+  // <https://codepen.io/samme/pen/gOpPLLx>
+
+  const angleToPointer = Phaser.Math.Angle.Between(Ball.x, Ball.y, pointer.worldX, pointer.worldY)
+  const angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - Ball.rotation)
+
+  if (Phaser.Math.Within(angleDelta, 0, TOLERANCE)) {
+    Ball.rotation = angleToPointer
+    Ball.setAngularVelocity(0)
+  } else {
+    Ball.setAngularVelocity(Math.sign(angleDelta) * ROTATION_SPEED_DEGREES)
   }
 }
