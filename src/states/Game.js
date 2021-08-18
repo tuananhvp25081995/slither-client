@@ -55,7 +55,7 @@ export default class extends Phaser.Scene {
     new BotSnake(this.game, 'atom-circle', Util.randomInt(-width, width), Util.randomInt(-height, height))
     new BotSnake(this.game, 'orange-circle', Util.randomInt(-width, width), Util.randomInt(-height, height))
     new BotSnake(this.game, 'yellow-gradient-circle', Util.randomInt(-width, width), Util.randomInt(-height, height))
-    
+
     // initialize snake groups and collision
     for (let i = 0; i < this.game.snakes.length; i++) {
       const snake = this.game.snakes[i]

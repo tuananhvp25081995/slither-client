@@ -26,15 +26,11 @@ export default class extends Phaser.Scene {
     this.load.image('spotify-circle', 'assets/images/spotify-circle.png')
     this.load.image('green-circle', 'assets/images/green-circle.png')
     this.load.image('yellow-gradient-circle', 'assets/images/yellow-gradient-circle.png')
-
-
     this.load.image('eye-white', 'assets/images/eye-white.png')
     this.load.image('eye-black', 'assets/images/eye-black.png')
     this.load.image('shadow', 'assets/images/white-shadow.png')
-
     this.load.image('food', 'assets/images/food.png')
     this.load.image('background', 'assets/images/background.jpg')
-
     this.load.audio('eat', 'assets/audio/eat.mp3')
   }
 
