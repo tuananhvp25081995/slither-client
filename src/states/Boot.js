@@ -10,13 +10,13 @@ export default class Boot extends Phaser.Scene {
   }
 
   create () {
-    this.game.snakes = []
-    console.log(this)
-    snake = new Snake(this, 400, 400, 'circle')
-    console.log(snake)
     const gameWidth = this.game.config.width
     const gameHeight = this.game.config.height
     this.add.tileSprite(0, 0, gameWidth * 3, gameHeight * 3, 'background')
+
+    this.game.snakes = []
+
+    snake = new Snake(this, 0, 0, 'circle')
 
     // snake = this.add.circle(200, 300, 10, 0xffffff, 1);
     // this.physics.add.existing(snake);
@@ -90,7 +90,7 @@ export default class Boot extends Phaser.Scene {
 
       snake.head.body.setMaxVelocity(10)
     } else {
-      snake.head.body.setMaxVelocity(800)
+      snake.head.body.setMaxVelocity(200)
     }
   }
 }

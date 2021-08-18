@@ -35,9 +35,12 @@ export default class extends Phaser.GameObjects.Sprite {
     // init shadow
     // this.shadow = new Shadow(this.scene, this.sections, this.scale);
 
-    this.sectionGroup = this.scene.physics.add.group()
+    // this.sectionGroup = this.scene.physics.add.group()
 
-    // this.sectionGroup = this.scene.add.container();
+    this.sectionGroup = this.scene.add.container(x, y)
+    // this.sectionGroup.setSize(300, 300)
+    this.scene.physics.world.enable(this.sectionGroup)
+    console.log(this.sectionGroup)
     // this.scene.physics.add.existing(this.sectionGroup);
 
     // add the head of the snake
