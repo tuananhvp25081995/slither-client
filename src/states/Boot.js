@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import PowerRune from './PowerRune'
 import { Util } from '../utils'
+import Slot from '../sprites/Slots'
 let Ball
 let Circle
 let Food1
@@ -105,7 +106,22 @@ export default class Boot extends Phaser.Scene {
     }
 
     this.time.addEvent(circleBorderConfig)
+
+    this.slot = this.add.rectangle(this.cameras.main.width - 250, 100, 500, 200, 0x6666ff);
+    this.slot.setScrollFactor(0, 0);
+    
+    this.rightClick(this.slot);
   }
+
+  rightClick(slot){
+    this.input.mouse.disableContextMenu();
+
+    this.input.on('pointerdown', function (pointer){
+        if(pointer.rightButtonDown()){
+          slot.visible = !slot.visible
+        }
+    })
+}
 
   spriteHitHealth (sprite, health) {
     healthGroup.killAndHide(health)
