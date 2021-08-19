@@ -4,7 +4,6 @@ import PowerRune from './PowerRune'
 import { Util } from '../utils'
 import CircleBorder from '../sprites/CircleBorder'
 let snake
-let Ball
 let Circle
 let healthGroup
 let foodGroup
@@ -30,7 +29,6 @@ export default class Boot extends Phaser.Scene {
     const gameWidth = this.game.config.width
     const gameHeight = this.game.config.height
     this.add.tileSprite(0, 0, gameWidth * 3, gameHeight * 3, 'background')
-    console.log(this)
 
     // Init Snake
     this.game.snakes = []
@@ -84,7 +82,8 @@ export default class Boot extends Phaser.Scene {
 
     // create Circle
     // Circle = CircleBorder.createCircle(this, gameWidth / 2)
-    Circle = new CircleBorder(this, gameWidth, { x: -gameWidth, y: -gameHeight - 500 })
+
+    Circle = new CircleBorder(this, gameWidth / 2, { x: -gameWidth / 2, y: -gameHeight / 2 })
 
     // resize Circle
     Circle.resize(5000, 0.75)
@@ -123,30 +122,24 @@ export default class Boot extends Phaser.Scene {
       this.game.snakes[i].update()
     }
 
-    pointerMove(this.input.activePointer)
+    // pointerMove(this.input.activePointer)
     velocityFromRotation(snake.head.rotation, SPEED, snake.head.body.velocity)
     snake.head.body.debugBodyColor = (snake.head.body.angularVelocity === 0) ? 0xff0000 : 0xffff00
     const overlap = this.physics.world.overlap(Circle, snake.head)
     if (!overlap) {
       // console.log('outside')
-      const offset = Circle.body.radius * 0.1
-      if (Circle.body.halfWidth >= snake.head.x) {
-        snake.head.x += offset
-      } else {
-        snake.head.x -= 2.5 * offset
-      }
-      if (Circle.body.halfHeight >= snake.head.y) {
-        snake.head.y += offset
-      } else {
-        snake.head.y -= 2.5 * offset
-      }
-      // snake.head.setPosition(x, y)
+      const angleToPointer = Phaser.Math.Angle.Between(snake.head.x, snake.head.y, Circle.body.center.x, Circle.body.center.y)
+      const angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - snake.head.rotation)
 
-      // snake.head.body.setMaxVelocity(10)
+      if (Phaser.Math.Within(angleDelta, 0, TOLERANCE)) {
+        snake.head.rotation = angleToPointer
+        snake.head.setAngularVelocity(0)
+      } else {
+        snake.head.setAngularVelocity(Math.sign(angleDelta) * ROTATION_SPEED_DEGREES)
+      }
+    } else {
+      pointerMove(this.input.activePointer)
     }
-    // else {
-    //   snake.head.body.setMaxVelocity(200)
-    // }
   }
 }
 
