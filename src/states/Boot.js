@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import Snake from '../sprites/Snake'
 import PowerRune from './PowerRune'
 import { Util } from '../utils'
+import CircleBorder from '../sprites/CircleBorder'
 let snake
 let Ball
 let Circle
@@ -29,6 +30,7 @@ export default class Boot extends Phaser.Scene {
     const gameWidth = this.game.config.width
     const gameHeight = this.game.config.height
     this.add.tileSprite(0, 0, gameWidth * 3, gameHeight * 3, 'background')
+    console.log(this)
 
     // Init Snake
     this.game.snakes = []
@@ -81,39 +83,11 @@ export default class Boot extends Phaser.Scene {
     this.minimap.setBackgroundColor(0xffffff)
 
     // create Circle
-    Circle = this.add.graphics().lineStyle(5, 0x00ffff)
-    this.physics.add.existing(Circle)
-    Circle.body.allowGravity = false
-    Circle.body.setCircle(gameWidth / 4)
-    Circle.body.immovable = true
-    Circle.strokeCircle(
-      Circle.body.halfWidth,
-      Circle.body.halfHeight,
-      Circle.body.radius
-    )
-    // Resize Circle
-    const circleBorderConfig = {
-      delay: 5000,
-      callback: () => {
-        console.log('Initiate Resizing')
-        console.log(
-          'Resizing in Progress... Will take about 25 seconds'
-        )
+    // Circle = CircleBorder.createCircle(this, gameWidth / 2)
+    Circle = new CircleBorder(this, gameWidth, { x: -gameWidth, y: -gameHeight - 500 })
 
-        const interval = setInterval(() => {
-          if (Circle.scale >= 0.75) {
-            Circle.scale -= 0.001
-            Circle.x += Circle.body.halfWidth * 0.001
-            Circle.y += Circle.body.halfHeight * 0.001
-          } else {
-            clearInterval(interval)
-            console.log('Finish Resizing')
-          }
-        }, 100)
-      }
-    }
-
-    this.time.addEvent(circleBorderConfig)
+    // resize Circle
+    Circle.resize(5000, 0.75)
 
     this.slot = this.add.image(this.cameras.main.width, 0, 'rectangle')
     this.slot.setPosition(this.cameras.main.width - this.slot.width / 2, this.slot.height / 2)
@@ -154,23 +128,25 @@ export default class Boot extends Phaser.Scene {
     snake.head.body.debugBodyColor = (snake.head.body.angularVelocity === 0) ? 0xff0000 : 0xffff00
     const overlap = this.physics.world.overlap(Circle, snake.head)
     if (!overlap) {
-      let { x, y } = snake.head.getCenter()
-      if (Circle.body.halfWidth >= x) {
-        x = Math.abs(Circle.body.halfWidth - x) * 0.1 + x
+      // console.log('outside')
+      const offset = Circle.body.radius * 0.1
+      if (Circle.body.halfWidth >= snake.head.x) {
+        snake.head.x += offset
       } else {
-        x = x - Math.abs(Circle.body.halfWidth - x) * 0.1
+        snake.head.x -= 2.5 * offset
       }
-      if (Circle.body.halfHeight >= y) {
-        y = Math.abs(Circle.body.halfHeight - y) * 0.1 + y
+      if (Circle.body.halfHeight >= snake.head.y) {
+        snake.head.y += offset
       } else {
-        y = y - Math.abs(Circle.body.halfHeight - y) * 0.1
+        snake.head.y -= 2.5 * offset
       }
-      snake.head.setPosition(x, y)
+      // snake.head.setPosition(x, y)
 
-      snake.head.body.setMaxVelocity(10)
-    } else {
-      snake.head.body.setMaxVelocity(200)
+      // snake.head.body.setMaxVelocity(10)
     }
+    // else {
+    //   snake.head.body.setMaxVelocity(200)
+    // }
   }
 }
 
