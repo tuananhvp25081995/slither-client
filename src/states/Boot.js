@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import PowerRune from './PowerRune'
 import { Util } from '../utils'
+import Slot from '../sprites/Slot'
 
 let Ball
 let Circle
@@ -16,6 +17,7 @@ export default class Boot extends Phaser.Scene {
     this.load.image('star', 'assets/images/runes/star.png')
     this.load.image('heart', 'assets/images/runes/heart.png')
     this.load.image('rectangle', 'assets/images/Rectangle.png')
+    this.load.image('item', 'assets/images/orange-circle.png')
   }
 
   create () {
@@ -108,13 +110,18 @@ export default class Boot extends Phaser.Scene {
 
     this.time.addEvent(circleBorderConfig)
 
-    this.slot = this.add.image(this.cameras.main.width, 0, 'rectangle');
-    this.slot.setPosition(this.cameras.main.width - this.slot.width/2, this.slot.height/2)
-    this.slot.setScrollFactor(0, 0);
+    // slot
+    // this.slot = this.add.image(this.cameras.main.width, 0, 'rectangle');
+    // this.slot.setPosition(this.cameras.main.width - this.slot.width/2, this.slot.height/2)
+    // this.slot.setScrollFactor(0, 0);
 
-    this.minimap.ignore(this.slot)
-
+    // this.minimap.ignore(this.slot)
+    this.slot = new Slot(this, this.cameras.main.width, 0)
+    this.slot.showGrid();
     this.rightClick(this.slot);
+
+    this.item = this.add.image(0,0,'item');
+    this.slot.placeAt(2, 2, this.item)
   }
 
   rightClick(slot){
@@ -122,7 +129,7 @@ export default class Boot extends Phaser.Scene {
 
     this.input.on('pointerdown', function (pointer){
         if(pointer.rightButtonDown()){
-          slot.visible = !slot.visible
+          slot.click()
         }
     })
 }
