@@ -7,8 +7,8 @@ let Ball
 let Circle
 let healthGroup
 let foodGroup
-const SPEED = 400
-const ROTATION_SPEED = 1 * Math.PI
+const SPEED = 200
+const ROTATION_SPEED = 1.5 * Math.PI
 const ROTATION_SPEED_DEGREES = Phaser.Math.RadToDeg(ROTATION_SPEED)
 const TOLERANCE = 0.02 * ROTATION_SPEED
 
