@@ -111,11 +111,6 @@ export default class Boot extends Phaser.Scene {
     this.time.addEvent(circleBorderConfig)
 
     // slot
-    // this.slot = this.add.image(this.cameras.main.width, 0, 'rectangle');
-    // this.slot.setPosition(this.cameras.main.width - this.slot.width/2, this.slot.height/2)
-    // this.slot.setScrollFactor(0, 0);
-
-    // this.minimap.ignore(this.slot)
     this.slot = new Slot(this, this.cameras.main.width, 0)
     this.slot.showGrid();
     this.rightClick(this.slot);
