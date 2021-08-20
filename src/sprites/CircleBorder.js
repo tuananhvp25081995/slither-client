@@ -1,7 +1,7 @@
 import Phaser from 'phaser'
 
 export default class extends Phaser.GameObjects.Graphics {
-  constructor (scene, radius, options = {}) {
+  constructor (scene, radius, options) {
     super(scene, options)
 
     this.lineStyle(5, 0x00ffff)
@@ -11,10 +11,7 @@ export default class extends Phaser.GameObjects.Graphics {
     this.body.allowGravity = false
     this.body.setCircle(radius)
     this.body.immovable = true
-    this.strokeCircle(
-      this.body.halfWidth,
-      this.body.halfHeight,
-      this.body.radius)
+    this.strokeCircle(this.body.halfWidth, this.body.halfHeight, radius)
   }
 
   resize (delay, scale) {
