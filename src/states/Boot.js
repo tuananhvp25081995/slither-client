@@ -25,6 +25,10 @@ export default class Boot extends Phaser.Scene {
     this.load.image('rectangle', 'assets/images/Rectangle.png')
     this.load.image('item', 'assets/images/orange-circle.png')
     this.load.image('circle', 'assets/images/circle.png')
+    this.load.image('skill1', 'assets/images/skill1.png')
+    this.load.image('skill2', 'assets/images/skill2.png')
+    this.load.image('skill3', 'assets/images/skill3.png')
+    this.load.image('skill4', 'assets/images/skill4.png')
   }
 
   create () {
@@ -92,22 +96,8 @@ export default class Boot extends Phaser.Scene {
     Circle.resize(5000, 0.75)
 
     // slot
-    this.slot = new Slot(this, this.cameras.main.width, 0)
-    this.slot.showGrid();
-    this.rightClick(this.slot);
-
-    this.item = this.add.image(0,0,'item');
-    this.slot.placeAt(2, 2, this.item)
-  }
-
-  rightClick (slot) {
-    this.input.mouse.disableContextMenu()
-
-    this.input.on('pointerdown', function (pointer){
-        if(pointer.rightButtonDown()){
-          slot.click()
-        }
-    })
+    this.slot = new Slot(this, this.cameras.main.width, this.cameras.main.height)
+    
   }
 
   spriteHitHealth (sprite, health) {
@@ -121,6 +111,7 @@ export default class Boot extends Phaser.Scene {
   }
 
   update (delta) {
+    this.slot.update();
     for (let i = this.game.snakes.length - 1; i >= 0; i--) {
       this.game.snakes[i].update()
     }
