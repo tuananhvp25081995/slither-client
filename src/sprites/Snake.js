@@ -1,10 +1,10 @@
-import Phaser from 'phaser'
+import Phaser, { Color } from 'phaser'
 // import EyePair from "./EyePair";
 // import Shadow from "./Shadow";
 import { Util } from '../utils'
-
+let nickName;
 export default class extends Phaser.GameObjects.Sprite {
-  constructor (scene, x, y, texture) {
+  constructor(scene, x, y, texture) {
     super(scene, x, y, texture)
     // this.anchor.setTo(0.5)
 
@@ -36,8 +36,15 @@ export default class extends Phaser.GameObjects.Sprite {
     // this.shadow = new Shadow(this.scene, this.sections, this.scale);
 
     // this.sectionGroup = this.scene.physics.add.group()
-
     this.sectionGroup = this.scene.add.container(x, y)
+    // add nick name
+    nickName = 'hello';
+    this.textPosition = this.scene.add.text(x, y, nickName, {
+      fontFamily: 'sans-serif',
+      fontSize: '20px',
+      color: '#fff'
+    })
+    // add nickname
     // this.sectionGroup.setSize(300, 300)
     this.scene.physics.world.enable(this.sectionGroup)
     this.sectionGroup.body.setCollideWorldBounds(true)
@@ -86,7 +93,7 @@ export default class extends Phaser.GameObjects.Sprite {
     // this.edge.body.onBeginContact.add(this.edgeContact, this);
   }
 
-  edgeContact (phaserBody) {
+  edgeContact(phaserBody) {
     // if the edge hits another snake's section, destroy this snake
     if (phaserBody && this.sections.indexOf(phaserBody.sprite) === -1) {
       this.destroy()
@@ -99,7 +106,7 @@ export default class extends Phaser.GameObjects.Sprite {
     }
   }
 
-  addSectionAtPosition (x, y) {
+  addSectionAtPosition(x, y) {
     // init new section
     const sec = this.scene.physics.add.sprite(x, y, this.spriteKey)
 
@@ -123,7 +130,7 @@ export default class extends Phaser.GameObjects.Sprite {
     return sec
   }
 
-  initSections (num) {
+  initSections(num) {
     for (let i = 1; i <= num; i++) {
       const x = this.head.body.x
       const y = this.head.body.y + i * this.preferredDistance
@@ -133,11 +140,11 @@ export default class extends Phaser.GameObjects.Sprite {
     }
   }
 
-  addSectionsAfterLast (amount) {
+  addSectionsAfterLast(amount) {
     this.queuedSections += amount
   }
 
-  update () {
+  update() {
     // const angle = Phaser.Math.Angle.Between(
     //   this.head.x,
     //   this.head.y,
@@ -157,11 +164,10 @@ export default class extends Phaser.GameObjects.Sprite {
     // }
     // const speed = this.speed;
     // this.head.body.moveForward(speed);
-
+    this.textPosition.setPosition(this.head.body.x, this.head.body.y - 16)
     const point = this.headPath.pop()
     point.setTo(this.head.body.x, this.head.body.y)
     this.headPath.unshift(point)
-
     // place each section of the snake on the path of the snake head
     // certain distance from the section before it
     let index = 0
@@ -197,11 +203,11 @@ export default class extends Phaser.GameObjects.Sprite {
     let found = false
     while (
       this.headPath[i].x !== this.sections[1].body.x &&
-            this.headPath[i].y !== this.sections[1].body.y
+      this.headPath[i].y !== this.sections[1].body.y
     ) {
       if (
         this.headPath[i].x === this.lastHeadPosition.x &&
-                this.headPath[i].y === this.lastHeadPosition.y
+        this.headPath[i].y === this.lastHeadPosition.y
       ) {
         found = true
         break
@@ -223,7 +229,7 @@ export default class extends Phaser.GameObjects.Sprite {
     // this.shadow.update();
   }
 
-  findNextPointIndex (currentIndex) {
+  findNextPointIndex(currentIndex) {
     // const pt = this.headPath[currentIndex]
     // we are trying to find a point at approximately this distance away
     // from the point before it, where the distance is the total length of
@@ -265,7 +271,7 @@ export default class extends Phaser.GameObjects.Sprite {
      * Called each time the snake's second section reaches where the
      * first section was at the last call (completed a single cycle)
      */
-  onCycleComplete () {
+  onCycleComplete() {
     if (this.queuedSections > 0) {
       const lastSec = this.sections[this.sections.length - 1]
       this.addSectionAtPosition(lastSec.body.x, lastSec.body.y)
@@ -273,7 +279,7 @@ export default class extends Phaser.GameObjects.Sprite {
     }
   }
 
-  setScale (scale) {
+  setScale(scale) {
     this.scale = scale
     this.preferredDistance = 17 * this.scale
 
@@ -292,17 +298,17 @@ export default class extends Phaser.GameObjects.Sprite {
 
   // this.eyes.setScale(scale);
 
-  incrementSize () {
+  incrementSize() {
     this.addSectionsAfterLast(1)
     this.setScale(this.scale * 1.01)
   }
 
-  addDestroyedCallback (callback, context) {
+  addDestroyedCallback(callback, context) {
     this.onDestroyedCallbacks.push(callback)
     this.onDestroyedContexts.push(context)
   }
 
-  destroy () {
+  destroy() {
     this.scene.snakes.splice(this.scene.snakes.indexOf(this), 1)
     this.sections.forEach(function (sec, index) {
       sec.destroy()
