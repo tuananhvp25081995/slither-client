@@ -38,7 +38,7 @@ export default class extends Phaser.GameObjects.Sprite {
     // this.sectionGroup = this.scene.physics.add.group()
     this.sectionGroup = this.scene.add.container(x, y)
     // add nick name
-    nickName = 'hello';
+    nickName = localStorage.getItem('username');
     this.textPosition = this.scene.add.text(x, y, nickName, {
       fontFamily: 'sans-serif',
       fontSize: '20px',

@@ -12,5 +12,9 @@ export default {
     arcade: {
       gravity: { y: 0 }
     }
-  }
+  },
+  parent: 'login',
+  dom: {
+    createContainer: true
+  },
 }
