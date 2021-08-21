@@ -1,7 +1,5 @@
 import Phaser from 'phaser'
 import Snake from '../sprites/Snake'
-import PowerRune from './PowerRune'
-import { Util } from '../utils'
 import Slot from '../sprites/Slot'
 
 import CircleBorder from '../sprites/CircleBorder'
@@ -97,21 +95,18 @@ export default class Boot extends Phaser.Scene {
 
     // slot
     this.slot = new Slot(this, this.cameras.main.width, this.cameras.main.height)
-    
   }
 
   spriteHitHealth (sprite, health) {
     healthGroup.killAndHide(health)
-    console.log('power rune')
   }
 
   spriteHitFood (sprite, health) {
     foodGroup.killAndHide(health)
-    console.log('food')
   }
 
   update (delta) {
-    this.slot.update();
+    this.slot.update()
     for (let i = this.game.snakes.length - 1; i >= 0; i--) {
       this.game.snakes[i].update()
     }
