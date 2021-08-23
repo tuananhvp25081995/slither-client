@@ -7,6 +7,7 @@ let snake
 let Circle
 let healthGroup
 let foodGroup
+let socket
 const SPEED = 200
 const ROTATION_SPEED = 1.5 * Math.PI
 const ROTATION_SPEED_DEGREES = Phaser.Math.RadToDeg(ROTATION_SPEED)
@@ -30,6 +31,38 @@ export default class Boot extends Phaser.Scene {
   }
 
   create () {
+    const name = localStorage.getItem('username')
+    socket = new WebSocket(`ws://66.42.51.96/ws/${name}`)
+    const getSocket = () => {
+      socket.onopen = () => {
+        heartbeat()
+      }
+      socket.onclose = () => {
+        getSocket()
+      }
+      socket.onerror = (error) => {
+        console.log('Socket Error: ', error)
+      }
+      socket.onmessage = (e) => {
+        const data = JSON.parse(e.data)
+        console.log(data)
+        // webSocketAction[data.action](data)
+      }
+    }
+    const heartbeat = () => {
+      if (!socket) return
+      socket.send('Ping')
+      setTimeout(heartbeat, 5000)
+    }
+    const webSocketAction = {
+      CircleSnake: (data) => {
+        // console.log(data)
+        // goatData.holder = data;
+      }
+    }
+
+    console.log(socket)
+    getSocket()
     // Always add map first. Everything else is added after map.
     const gameWidth = this.game.config.width
     const gameHeight = this.game.config.height
@@ -77,7 +110,7 @@ export default class Boot extends Phaser.Scene {
 
     healthGroup.refresh()
     foodGroup.refresh()
-    //  When the player sprite his the health packs, call this function ...
+    //  When the player sprite hits the foods, call this function ...
     this.physics.add.overlap(snake.head, foodGroup, this.spriteHitFood)
     this.physics.add.overlap(snake.head, healthGroup, this.spriteHitHealth)
     // minimap
@@ -111,7 +144,7 @@ export default class Boot extends Phaser.Scene {
       this.game.snakes[i].update()
     }
 
-    // pointerMove(this.input.activePointer)
+    pointerMove(this.input.activePointer)
     velocityFromRotation(snake.head.rotation, SPEED, snake.head.body.velocity)
     snake.head.body.debugBodyColor = (snake.head.body.angularVelocity === 0) ? 0xff0000 : 0xffff00
     const overlap = this.physics.world.overlap(Circle, snake.head)
@@ -140,6 +173,14 @@ function pointerMove (pointer) {
 
   const angleToPointer = Phaser.Math.Angle.Between(snake.head.x, snake.head.y, pointer.worldX, pointer.worldY)
   const angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - snake.head.rotation)
+  const event = {
+    event: 'change_target',
+    data: {
+      X: pointer.worldX,
+      Y: pointer.worldY
+    }
+  }
+  if (socket.readyState === 1) socket.send(JSON.stringify(event))
 
   if (Phaser.Math.Within(angleDelta, 0, TOLERANCE)) {
     snake.head.rotation = angleToPointer

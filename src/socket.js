@@ -1,6 +1,6 @@
 const socket = null
 const getSocket = () => {
-  const socket = new WebSocket('ws://192.168.1.30:8080/ws')
+  const socket = new WebSocket('ws://66.42.51.96/ws/ezzy`)')
   socket.onopen = () => {
     heartbeat()
   }
