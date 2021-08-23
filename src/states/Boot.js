@@ -46,14 +46,11 @@ export default class Boot extends Phaser.Scene {
       }
       socket.onmessage = (e) => {
         const data = JSON.parse(e.data)
-        console.log(data)
         const mySnake = data.filter((snake) => snake.Id === name)[0]
         this.sections = mySnake.CircleSnake.map((sec) => {
           return { x: sec.X, y: sec.Y }
         })
-        console.log(this.sections)
-
-        // webSocketAction[data.action](data)
+        // console.log(this.sections)
       }
     }
     const heartbeat = () => {

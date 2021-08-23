@@ -160,66 +160,70 @@ export default class extends Phaser.GameObjects.Sprite {
     // }
 
     this.textPosition.setPosition(this.head.body.x, this.head.body.y - 16)
-    // const point = this.headPath.pop()
-    // point.setTo(this.head.body.x, this.head.body.y)
-    // this.headPath.unshift(point)
-    // // place each section of the snake on the path of the snake head
-    // // certain distance from the section before it
-    // let index = 0
-    // let lastIndex = null
+
+    const point = this.headPath.pop()
+    point.setTo(this.head.body.x, this.head.body.y)
+    this.headPath.unshift(point)
+    // place each section of the snake on the path of the snake head
+    // certain distance from the section before it
+    let index = 0
+    let lastIndex = null
+
     for (let i = 0; i < this.snakeLength; i++) {
       // console.log(this.sections[i].body.x, this.sections[i].body.y)
+      this.sections[i].body.x = this.headPath[index].x
+      this.sections[i].body.y = this.headPath[index].y
       if (this.scene.sections) {
-        // console.log(this.scene.sections[i])
-        this.sections[i].body.x = this.scene.sections[i].x
-        this.sections[i].body.y = this.scene.sections[i].y
+        console.log(`Section: ${i}: Old - X:${this.sections[i].body.x}, Y:${this.sections[i].body.y} vs New - X:${this.scene.sections[i].x}, Y:${this.scene.sections[i].y} `)
+        // this.sections[i].body.x = this.scene.sections[i].x
+        // this.sections[i].body.y = this.scene.sections[i].y
       }
 
       // hide sections if they are at same pos
-      // if (lastIndex && index === lastIndex) {
-      //   this.sections[i].alpha = 0
-      // } else {
-      //   this.sections[i].alpha = 1
-      // }
+      if (lastIndex && index === lastIndex) {
+        this.sections[i].alpha = 0
+      } else {
+        this.sections[i].alpha = 1
+      }
 
-      // lastIndex = index
-      // // this finds the index in the head path array that the next point
-      // // should be at
-      // index = this.findNextPointIndex(index)
+      lastIndex = index
+      // this finds the index in the head path array that the next point
+      // should be at
+      index = this.findNextPointIndex(index)
     }
 
-    // // continuously adjust the size of the head path
-    // if (index >= this.headPath.length - 1) {
-    //   const lastPos = this.headPath[this.headPath.length - 1]
-    //   this.headPath.push(new Phaser.Geom.Point(lastPos.x, lastPos.y))
-    // } else {
-    //   this.headPath.pop()
-    // }
+    // continuously adjust the size of the head path
+    if (index >= this.headPath.length - 1) {
+      const lastPos = this.headPath[this.headPath.length - 1]
+      this.headPath.push(new Phaser.Geom.Point(lastPos.x, lastPos.y))
+    } else {
+      this.headPath.pop()
+    }
 
-    // // this calls onCycleComplete every time a cycle is completed.
+    // this calls onCycleComplete every time a cycle is completed.
 
-    // let i = 0
-    // let found = false
-    // while (
-    //   this.headPath[i].x !== this.sections[1].body.x &&
-    //   this.headPath[i].y !== this.sections[1].body.y
-    // ) {
-    //   if (
-    //     this.headPath[i].x === this.lastHeadPosition.x &&
-    //     this.headPath[i].y === this.lastHeadPosition.y
-    //   ) {
-    //     found = true
-    //     break
-    //   }
-    //   i++
-    // }
-    // if (!found) {
-    //   this.lastHeadPosition = new Phaser.Geom.Point(
-    //     this.head.body.x,
-    //     this.head.body.y
-    //   )
-    //   this.onCycleComplete()
-    // }
+    let i = 0
+    let found = false
+    while (
+      this.headPath[i].x !== this.sections[1].body.x &&
+      this.headPath[i].y !== this.sections[1].body.y
+    ) {
+      if (
+        this.headPath[i].x === this.lastHeadPosition.x &&
+        this.headPath[i].y === this.lastHeadPosition.y
+      ) {
+        found = true
+        break
+      }
+      i++
+    }
+    if (!found) {
+      this.lastHeadPosition = new Phaser.Geom.Point(
+        this.head.body.x,
+        this.head.body.y
+      )
+      this.onCycleComplete()
+    }
 
     // update the eyes
     // this.eyes.update();
