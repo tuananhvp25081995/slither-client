@@ -33,6 +33,7 @@ export default class Boot extends Phaser.Scene {
   create () {
     const name = localStorage.getItem('username')
     socket = new WebSocket(`ws://66.42.51.96/ws/${name}`)
+
     const getSocket = () => {
       socket.onopen = () => {
         heartbeat()
@@ -46,6 +47,12 @@ export default class Boot extends Phaser.Scene {
       socket.onmessage = (e) => {
         const data = JSON.parse(e.data)
         console.log(data)
+        const mySnake = data.filter((snake) => snake.Id === name)[0]
+        this.sections = mySnake.CircleSnake.map((sec) => {
+          return { x: sec.X, y: sec.Y }
+        })
+        console.log(this.sections)
+
         // webSocketAction[data.action](data)
       }
     }
@@ -71,6 +78,7 @@ export default class Boot extends Phaser.Scene {
     // Init Snake
     this.game.snakes = []
     snake = new Snake(this, 0, 0, 'circle')
+    // snake.initSections(sections)
     this.game.playerSnake = snake
     this.cameras.main.width = gameWidth / 2
     this.cameras.main.height = gameHeight / 2
@@ -148,20 +156,20 @@ export default class Boot extends Phaser.Scene {
     velocityFromRotation(snake.head.rotation, SPEED, snake.head.body.velocity)
     snake.head.body.debugBodyColor = (snake.head.body.angularVelocity === 0) ? 0xff0000 : 0xffff00
     const overlap = this.physics.world.overlap(Circle, snake.head)
-    if (!overlap) {
-      // console.log('outside')
-      const angleToPointer = Phaser.Math.Angle.Between(snake.head.x, snake.head.y, Circle.body.center.x, Circle.body.center.y)
-      const angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - snake.head.rotation)
+    // if (!overlap) {
+    //   // console.log('outside')
+    //   const angleToPointer = Phaser.Math.Angle.Between(snake.head.x, snake.head.y, Circle.body.center.x, Circle.body.center.y)
+    //   const angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - snake.head.rotation)
 
-      if (Phaser.Math.Within(angleDelta, 0, TOLERANCE)) {
-        snake.head.rotation = angleToPointer
-        snake.head.setAngularVelocity(0)
-      } else {
-        snake.head.setAngularVelocity(Math.sign(angleDelta) * ROTATION_SPEED_DEGREES)
-      }
-    } else {
-      pointerMove(this.input.activePointer)
-    }
+    //   if (Phaser.Math.Within(angleDelta, 0, TOLERANCE)) {
+    //     snake.head.rotation = angleToPointer
+    //     snake.head.setAngularVelocity(0)
+    //   } else {
+    //     snake.head.setAngularVelocity(Math.sign(angleDelta) * ROTATION_SPEED_DEGREES)
+    //   }
+    // } else {
+    //   pointerMove(this.input.activePointer)
+    // }
   }
 }
 
