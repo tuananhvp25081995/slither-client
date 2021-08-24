@@ -149,8 +149,8 @@ export default class Boot extends Phaser.Scene {
       this.game.snakes[i].update()
     }
 
-    pointerMove(this.input.activePointer)
-    velocityFromRotation(snake.head.rotation, SPEED, snake.head.body.velocity)
+    // pointerMove(this.input.activePointer)
+    // velocityFromRotation(snake.head.rotation, SPEED, snake.head.body.velocity)
     snake.head.body.debugBodyColor = (snake.head.body.angularVelocity === 0) ? 0xff0000 : 0xffff00
     const overlap = this.physics.world.overlap(Circle, snake.head)
     // if (!overlap) {
