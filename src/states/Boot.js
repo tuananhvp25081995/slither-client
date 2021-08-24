@@ -149,7 +149,7 @@ export default class Boot extends Phaser.Scene {
       this.game.snakes[i].update()
     }
 
-    // pointerMove(this.input.activePointer)
+    pointerMove(this.input.activePointer)
     // velocityFromRotation(snake.head.rotation, SPEED, snake.head.body.velocity)
     snake.head.body.debugBodyColor = (snake.head.body.angularVelocity === 0) ? 0xff0000 : 0xffff00
     const overlap = this.physics.world.overlap(Circle, snake.head)
@@ -175,9 +175,6 @@ function pointerMove (pointer) {
 
   // Also see alternative method in
   // <https://codepen.io/samme/pen/gOpPLLx>
-
-  const angleToPointer = Phaser.Math.Angle.Between(snake.head.x, snake.head.y, pointer.worldX, pointer.worldY)
-  const angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - snake.head.rotation)
   const event = {
     event: 'change_target',
     data: {
@@ -187,10 +184,13 @@ function pointerMove (pointer) {
   }
   if (socket.readyState === 1) socket.send(JSON.stringify(event))
 
-  if (Phaser.Math.Within(angleDelta, 0, TOLERANCE)) {
-    snake.head.rotation = angleToPointer
-    snake.head.setAngularVelocity(0)
-  } else {
-    snake.head.setAngularVelocity(Math.sign(angleDelta) * ROTATION_SPEED_DEGREES)
-  }
+  //   const angleToPointer = Phaser.Math.Angle.Between(snake.head.x, snake.head.y, pointer.worldX, pointer.worldY)
+  //   const angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - snake.head.rotation)
+
+//   if (Phaser.Math.Within(angleDelta, 0, TOLERANCE)) {
+//     snake.head.rotation = angleToPointer
+//     snake.head.setAngularVelocity(0)
+//   } else {
+//     snake.head.setAngularVelocity(Math.sign(angleDelta) * ROTATION_SPEED_DEGREES)
+//   }
 }
