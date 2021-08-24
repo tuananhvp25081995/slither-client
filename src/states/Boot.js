@@ -45,7 +45,7 @@ export default class Boot extends Phaser.Scene {
       }
       socket.onmessage = (e) => {
         const data = JSON.parse(e.data)
-        console.log(data)
+        // console.log(data)
         // webSocketAction[data.action](data)
       }
     }
@@ -144,7 +144,7 @@ export default class Boot extends Phaser.Scene {
       this.game.snakes[i].update()
     }
 
-    pointerMove(this.input.activePointer)
+    pointerMove(this.input.activePointer.updateWorldPoint(this.cameras.main))
     velocityFromRotation(snake.head.rotation, SPEED, snake.head.body.velocity)
     snake.head.body.debugBodyColor = (snake.head.body.angularVelocity === 0) ? 0xff0000 : 0xffff00
     const overlap = this.physics.world.overlap(Circle, snake.head)
@@ -160,24 +160,24 @@ export default class Boot extends Phaser.Scene {
         snake.head.setAngularVelocity(Math.sign(angleDelta) * ROTATION_SPEED_DEGREES)
       }
     } else {
-      pointerMove(this.input.activePointer)
+      pointerMove(this.input.activePointer.updateWorldPoint(this.cameras.main))
     }
   }
 }
 
-function pointerMove (pointer) {
+function pointerMove (pointer, camera) {
   // if (!pointer.manager.isOver) return;
 
   // Also see alternative method in
   // <https://codepen.io/samme/pen/gOpPLLx>
-
+  
   const angleToPointer = Phaser.Math.Angle.Between(snake.head.x, snake.head.y, pointer.worldX, pointer.worldY)
   const angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - snake.head.rotation)
   const event = {
     event: 'change_target',
     data: {
-      X: pointer.worldX,
-      Y: pointer.worldY
+      X: pointer.x,
+      Y: pointer.y
     }
   }
   if (socket.readyState === 1) socket.send(JSON.stringify(event))
