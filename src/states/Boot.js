@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import Snake from '../sprites/Snake'
 import Slot from '../sprites/Slot'
+import Timer from '../sprites/Timer'
 
 import CircleBorder from '../sprites/CircleBorder'
 let snake
@@ -28,6 +29,7 @@ export default class Boot extends Phaser.Scene {
     this.load.image('skill2', 'assets/images/skill2.png')
     this.load.image('skill3', 'assets/images/skill3.png')
     this.load.image('skill4', 'assets/images/skill4.png')
+    this.load.html('leaderboard', 'assets/html/leaderboard.html')
   }
 
   create () {
@@ -128,6 +130,11 @@ export default class Boot extends Phaser.Scene {
 
     // slot
     this.slot = new Slot(this, this.cameras.main.width, this.cameras.main.height)
+    //time countdown
+    this.timer = new Timer(this);
+
+    this.board = this.add.dom(0, 0).createFromCache('leaderboard');
+    console.log('b', this.board);
   }
 
   spriteHitHealth (sprite, health) {
