@@ -8,6 +8,7 @@ let Circle
 let healthGroup
 let foodGroup
 let socket
+let tween
 const SPEED = 200
 const ROTATION_SPEED = 1.5 * Math.PI
 const ROTATION_SPEED_DEGREES = Phaser.Math.RadToDeg(ROTATION_SPEED)
@@ -31,8 +32,8 @@ export default class Boot extends Phaser.Scene {
   }
 
   create () {
-    const name = localStorage.getItem('username')
-    socket = new WebSocket(`ws://66.42.51.96/ws/${name}`)
+    this.mySnakeId = localStorage.getItem('username')
+    socket = new WebSocket(`ws://66.42.51.96/ws/${this.mySnakeId}`)
 
     const getSocket = () => {
       socket.onopen = () => {
@@ -46,13 +47,24 @@ export default class Boot extends Phaser.Scene {
       }
       socket.onmessage = (e) => {
         const data = JSON.parse(e.data)
-        const mySnake = data.filter((snake) => snake.Id === name)[0]
-        this.sections = mySnake.CircleSnake.map((sec) => {
-          return { x: sec.X, y: sec.Y }
-        })
-        // console.log(this.sections)
+        // const moveData = data.filter((d) => d.Action === 'snake-data')
+
+        // console.log(data)
+        if (data.Action === 'snake-data') {
+          const mySnake = data.Data.filter((snake) => snake.Id === this.mySnakeId)[0]
+          this.sections = mySnake.CircleSnake.map((sec) => {
+            return { x: sec.X, y: sec.Y }
+          })
+        }
+
+        // const otherSnakes = data.Players.filter((snake) => snake.Id !== this.mySnakeId)
+        // this.otherSnakesSections = otherSnakes.map((snake) => snake.CircleSnake.map((sec) => {
+        //   return { x: sec.X, y: sec.Y }
+        // }))
+        console.log(this.sections)
       }
     }
+
     const heartbeat = () => {
       if (!socket) return
       socket.send('Ping')
@@ -80,6 +92,15 @@ export default class Boot extends Phaser.Scene {
     this.cameras.main.width = gameWidth / 2
     this.cameras.main.height = gameHeight / 2
     this.cameras.main.startFollow(snake.head)
+    // this.cameras.main.setLerp(0.1, 0.1)
+
+    tween = this.tweens.add({
+      targets: snake.head,
+      x: 0,
+      y: 0,
+      ease: 'Linear',
+      duration: 1000
+    })
 
     // plusRunes = new PowerRune(this, snake.head, 'plus', 10, { x: -100, y: -100 }, { x: 750, y: 550 });
     //  When the player sprite his the health packs, call this function ...
@@ -149,8 +170,21 @@ export default class Boot extends Phaser.Scene {
       this.game.snakes[i].update()
     }
 
+    tween.play()
+    if (tween.isPlaying()) {
+      if (this.sections) {
+        // snake.head.x = this.sections[0].x
+        // snake.head.y = this.sections[0].y
+        // tween.updateTo('x', this.input.x, true)
+        // tween.updateTo('y', this.input.y, true)
+        tween.updateTo('x', this.sections[0].x, true)
+        tween.updateTo('y', this.sections[0].y, true)
+      }
+    }
+
     pointerMove(this.input.activePointer)
     // velocityFromRotation(snake.head.rotation, SPEED, snake.head.body.velocity)
+
     snake.head.body.debugBodyColor = (snake.head.body.angularVelocity === 0) ? 0xff0000 : 0xffff00
     const overlap = this.physics.world.overlap(Circle, snake.head)
     // if (!overlap) {
@@ -187,10 +221,10 @@ function pointerMove (pointer) {
   //   const angleToPointer = Phaser.Math.Angle.Between(snake.head.x, snake.head.y, pointer.worldX, pointer.worldY)
   //   const angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - snake.head.rotation)
 
-//   if (Phaser.Math.Within(angleDelta, 0, TOLERANCE)) {
-//     snake.head.rotation = angleToPointer
-//     snake.head.setAngularVelocity(0)
-//   } else {
-//     snake.head.setAngularVelocity(Math.sign(angleDelta) * ROTATION_SPEED_DEGREES)
-//   }
+  //   if (Phaser.Math.Within(angleDelta, 0, TOLERANCE)) {
+  //     snake.head.rotation = angleToPointer
+  //     snake.head.setAngularVelocity(0)
+  //   } else {
+  //     snake.head.setAngularVelocity(Math.sign(angleDelta) * ROTATION_SPEED_DEGREES)
+  //   }
 }
