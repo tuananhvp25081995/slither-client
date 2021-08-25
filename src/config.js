@@ -13,7 +13,7 @@ export default {
       gravity: { y: 0 }
     }
   },
-  parent: ['leaderboard' ,'login'],
+  parent: ['login'],
   dom: {
     createContainer: true
   },
