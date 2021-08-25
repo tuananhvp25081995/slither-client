@@ -2,14 +2,12 @@ export default class Leaderboard{
     constructor(scene){
         this.scene = scene;
 
-        let x = -this.scene.cameras.main.width * 2
-        let y = -this.scene.cameras.main.height
+        let x = -this.scene.sys.game.width
+        let y = 0
 
-        this.board = this.scene.add.dom(x, y).createFromCache('leaderboard').setScrollFactor(0,0);
+        this.board = this.scene.add.dom(x, y).createFromCache('leaderboard');
         this.board.setOrigin(0,0);
-        this.board.setDepth(1000)
-        this.board.setScale(10)
-        // this.scene.minimap.ignore(this.board)
+        
         this.scene.cameras.main.setVisible(this.board)
         let table = this.board.getChildByID('myTable')
         

@@ -22,7 +22,6 @@ export default class Game extends Phaser.Scene {
   preload () {}
 
   create () {
-    console.log('game');
     const name = localStorage.getItem('username')
     socket = new WebSocket(`ws://66.42.51.96/ws/${name}`)
     const getSocket = () => {
