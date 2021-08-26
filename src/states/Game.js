@@ -15,6 +15,7 @@ const ROTATION_SPEED = 1.5 * Math.PI
 const ROTATION_SPEED_DEGREES = Phaser.Math.RadToDeg(ROTATION_SPEED)
 const TOLERANCE = 0.02 * ROTATION_SPEED
 let snakeDataUpdate = []
+let isUpdate = false
 
 const velocityFromRotation = Phaser.Physics.Arcade.ArcadePhysics.prototype.velocityFromRotation
 
@@ -36,7 +37,7 @@ export default class Game extends Phaser.Scene {
       }
       socket.onmessage = (e) => {
         const data = JSON.parse(e.data)
-       // console.log(data)
+        // console.log(data)
         webSocketAction[data.Action](data)
       }
     }
@@ -52,6 +53,7 @@ export default class Game extends Phaser.Scene {
         })[0]
         console.log(dataUpdate)
         snakeDataUpdate = [...dataUpdate.CircleSnake]
+        isUpdate = true
       },
 
       'food-data': (data) => {
@@ -142,29 +144,33 @@ export default class Game extends Phaser.Scene {
 
   update (delta) {
     console.log('Khoitao', snake.head.body.x, snake.head.body.y)
-    console.log('update', snakeDataUpdate);
-    this.slot.update()
-    for (let i = this.game.snakes.length - 1; i >= 0; i--) {
-      this.game.snakes[i].update(snakeDataUpdate)
-    }
-
-    pointerMove(this.input.activePointer.updateWorldPoint(this.cameras.main))
-    velocityFromRotation(snake.head.rotation, SPEED, snake.head.body.velocity)
-    snake.head.body.debugBodyColor = (snake.head.body.angularVelocity === 0) ? 0xff0000 : 0xffff00
-    const overlap = this.physics.world.overlap(Circle, snake.head)
-    if (!overlap) {
-      // console.log('outside')
-      const angleToPointer = Phaser.Math.Angle.Between(snake.head.x, snake.head.y, Circle.body.center.x, Circle.body.center.y)
-      const angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - snake.head.rotation)
-
-      if (Phaser.Math.Within(angleDelta, 0, TOLERANCE)) {
-        snake.head.rotation = angleToPointer
-        snake.head.setAngularVelocity(0)
-      } else {
-        snake.head.setAngularVelocity(Math.sign(angleDelta) * ROTATION_SPEED_DEGREES)
+    console.log('update', snakeDataUpdate)
+    if (isUpdate) {
+      this.slot.update()
+      for (let i = this.game.snakes.length - 1; i >= 0; i--) {
+        this.game.snakes[i].update(snakeDataUpdate)
       }
-    } else {
+
       pointerMove(this.input.activePointer.updateWorldPoint(this.cameras.main))
+      velocityFromRotation(snake.head.rotation, SPEED, snake.head.body.velocity)
+      snake.head.body.debugBodyColor = (snake.head.body.angularVelocity === 0) ? 0xff0000 : 0xffff00
+      const overlap = this.physics.world.overlap(Circle, snake.head)
+      if (!overlap) {
+      // console.log('outside')
+        const angleToPointer = Phaser.Math.Angle.Between(snake.head.x, snake.head.y, Circle.body.center.x, Circle.body.center.y)
+        const angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - snake.head.rotation)
+
+        if (Phaser.Math.Within(angleDelta, 0, TOLERANCE)) {
+          snake.head.rotation = angleToPointer
+          snake.head.setAngularVelocity(0)
+        } else {
+          snake.head.setAngularVelocity(Math.sign(angleDelta) * ROTATION_SPEED_DEGREES)
+        }
+      } else {
+        pointerMove(this.input.activePointer.updateWorldPoint(this.cameras.main))
+      }
+
+      isUpdate = false
     }
   }
 }

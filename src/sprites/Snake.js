@@ -183,7 +183,7 @@ export default class extends Phaser.GameObjects.Sprite {
     // let index = 0
     // let lastIndex = null
 
-    for (let i = 1; i < this.tween.length; i++) {
+    for (let i = 0; i < this.tween.length; i++) {
       this.tween[i].play()
       if (this.tween[i].isPlaying() && snakeDataUpdate[i]) {
         console.log(`tween ${i} is playing`)
