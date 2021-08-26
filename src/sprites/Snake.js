@@ -64,6 +64,20 @@ export default class extends Phaser.GameObjects.Sprite {
     this.initSections(9)
     // init eyes
     // this.eyes = new EyePair(this.scene, this.head, this.scale);
+    this.tween = []
+
+    this.sections.forEach((sec) => {
+      if (this.sections.indexOf(sec) !== 0) {
+        const tween = this.scene.tweens.add({
+          targets: sec,
+          x,
+          y,
+          ease: 'Linear',
+          duration: 10000
+        })
+        this.tween.push(tween)
+      }
+    })
 
     this.onDestroyedCallbacks = []
     this.onDestroyedContexts = []
@@ -168,9 +182,19 @@ export default class extends Phaser.GameObjects.Sprite {
     // certain distance from the section before it
     // let index = 0
     // let lastIndex = null
+
+    for (let i = 1; i < this.tween.length; i++) {
+      this.tween[i].play()
+      if (this.tween[i].isPlaying() && snakeDataUpdate[i]) {
+        console.log(`tween ${i} is playing`)
+        this.tween[i].updateTo('x', snakeDataUpdate[i].X, true)
+        this.tween[i].updateTo('y', snakeDataUpdate[i].Y, true)
+      }
+    }
+
     for (let i = 1; i < snakeDataUpdate.length; i++) {
-      this.sections[i].body.x = snakeDataUpdate[i].X
-      this.sections[i].body.y = snakeDataUpdate[i].Y
+      // this.sections[i].body.x = snakeDataUpdate[i].X
+      // this.sections[i].body.y = snakeDataUpdate[i].Y
 
       // hide sections if they are at same pos
       // if (lastIndex && index === lastIndex) {
