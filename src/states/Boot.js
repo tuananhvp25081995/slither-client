@@ -14,7 +14,8 @@ const ROTATION_SPEED = 1.5 * Math.PI
 const ROTATION_SPEED_DEGREES = Phaser.Math.RadToDeg(ROTATION_SPEED)
 const TOLERANCE = 0.02 * ROTATION_SPEED
 
-const velocityFromRotation = Phaser.Physics.Arcade.ArcadePhysics.prototype.velocityFromRotation
+const velocityFromRotation =
+    Phaser.Physics.Arcade.ArcadePhysics.prototype.velocityFromRotation
 export default class Boot extends Phaser.Scene {
   preload () {
     this.load.image('background', 'assets/images/background.jpg')
@@ -49,9 +50,11 @@ export default class Boot extends Phaser.Scene {
         const data = JSON.parse(e.data)
         // const moveData = data.filter((d) => d.Action === 'snake-data')
 
-        // console.log(data)
+        console.log(data)
         if (data.Action === 'snake-data') {
-          const mySnake = data.Data.filter((snake) => snake.Id === this.mySnakeId)[0]
+          const mySnake = data.Data.filter(
+            (snake) => snake.Id === this.mySnakeId
+          )[0]
           this.sections = mySnake.CircleSnake.map((sec) => {
             return { x: sec.X, y: sec.Y }
           })
@@ -86,21 +89,15 @@ export default class Boot extends Phaser.Scene {
 
     // Init Snake
     this.game.snakes = []
-    snake = new Snake(this, 0, 0, 'circle')
+    snake = new Snake(this, 100, 100, 'circle')
     // snake.initSections(sections)
     this.game.playerSnake = snake
     this.cameras.main.width = gameWidth / 2
     this.cameras.main.height = gameHeight / 2
+    // this.cameras.main.centerOn(snake.head.x, snake.head.y)
     this.cameras.main.startFollow(snake.head)
-    // this.cameras.main.setLerp(0.1, 0.1)
 
-    tween = this.tweens.add({
-      targets: snake.head,
-      x: 0,
-      y: 0,
-      ease: 'Linear',
-      duration: 1000
-    })
+    // this.cameras.main.setLerp(0.1, 0.1)
 
     // plusRunes = new PowerRune(this, snake.head, 'plus', 10, { x: -100, y: -100 }, { x: 750, y: 550 });
     //  When the player sprite his the health packs, call this function ...
@@ -141,19 +138,33 @@ export default class Boot extends Phaser.Scene {
     this.physics.add.overlap(snake.head, healthGroup, this.spriteHitHealth)
     // minimap
     const minimapSize = gameWidth / 20
-    this.minimap = this.cameras.add(this.cameras.main.width - minimapSize, this.cameras.main.height - minimapSize, minimapSize, minimapSize).setZoom(0.016)
+    this.minimap = this.cameras
+      .add(
+        this.cameras.main.width - minimapSize,
+        this.cameras.main.height - minimapSize,
+        minimapSize,
+        minimapSize
+      )
+      .setZoom(0.016)
     this.minimap.setBackgroundColor(0xffffff)
 
     // create Circle
     // Circle = CircleBorder.createCircle(this, gameWidth / 2)
 
-    Circle = new CircleBorder(this, gameWidth / 2, { x: -gameWidth / 2, y: -gameHeight / 2 })
+    Circle = new CircleBorder(this, gameWidth / 2, {
+      x: -gameWidth / 2,
+      y: -gameHeight / 2
+    })
 
     // resize Circle
     Circle.resize(5000, 0.75)
 
     // slot
-    this.slot = new Slot(this, this.cameras.main.width, this.cameras.main.height)
+    this.slot = new Slot(
+      this,
+      this.cameras.main.width,
+      this.cameras.main.height
+    )
   }
 
   spriteHitHealth (sprite, health) {
@@ -170,37 +181,26 @@ export default class Boot extends Phaser.Scene {
       this.game.snakes[i].update()
     }
 
-    tween.play()
-    if (tween.isPlaying()) {
-      if (this.sections) {
-        // snake.head.x = this.sections[0].x
-        // snake.head.y = this.sections[0].y
-        // tween.updateTo('x', this.input.x, true)
-        // tween.updateTo('y', this.input.y, true)
-        tween.updateTo('x', this.sections[0].x, true)
-        tween.updateTo('y', this.sections[0].y, true)
-      }
-    }
-
     pointerMove(this.input.activePointer)
     // velocityFromRotation(snake.head.rotation, SPEED, snake.head.body.velocity)
 
-    snake.head.body.debugBodyColor = (snake.head.body.angularVelocity === 0) ? 0xff0000 : 0xffff00
+    snake.head.body.debugBodyColor =
+            snake.head.body.angularVelocity === 0 ? 0xff0000 : 0xffff00
     const overlap = this.physics.world.overlap(Circle, snake.head)
-    // if (!overlap) {
-    //   // console.log('outside')
-    //   const angleToPointer = Phaser.Math.Angle.Between(snake.head.x, snake.head.y, Circle.body.center.x, Circle.body.center.y)
-    //   const angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - snake.head.rotation)
+    if (!overlap) {
+      console.log('outside')
+      //   const angleToPointer = Phaser.Math.Angle.Between(snake.head.x, snake.head.y, Circle.body.center.x, Circle.body.center.y)
+      //   const angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - snake.head.rotation)
 
-    //   if (Phaser.Math.Within(angleDelta, 0, TOLERANCE)) {
-    //     snake.head.rotation = angleToPointer
-    //     snake.head.setAngularVelocity(0)
-    //   } else {
-    //     snake.head.setAngularVelocity(Math.sign(angleDelta) * ROTATION_SPEED_DEGREES)
-    //   }
-    // } else {
-    //   pointerMove(this.input.activePointer)
-    // }
+      //   if (Phaser.Math.Within(angleDelta, 0, TOLERANCE)) {
+      //     snake.head.rotation = angleToPointer
+      //     snake.head.setAngularVelocity(0)
+      //   } else {
+      //     snake.head.setAngularVelocity(Math.sign(angleDelta) * ROTATION_SPEED_DEGREES)
+      //   }
+      // } else {
+      //   pointerMove(this.input.activePointer)
+    }
   }
 }
 
@@ -218,13 +218,13 @@ function pointerMove (pointer) {
   }
   if (socket.readyState === 1) socket.send(JSON.stringify(event))
 
-  //   const angleToPointer = Phaser.Math.Angle.Between(snake.head.x, snake.head.y, pointer.worldX, pointer.worldY)
-  //   const angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - snake.head.rotation)
+  // const angleToPointer = Phaser.Math.Angle.Between(snake.head.x, snake.head.y, pointer.worldX, pointer.worldY)
+  // const angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - snake.head.rotation)
 
-  //   if (Phaser.Math.Within(angleDelta, 0, TOLERANCE)) {
-  //     snake.head.rotation = angleToPointer
-  //     snake.head.setAngularVelocity(0)
-  //   } else {
-  //     snake.head.setAngularVelocity(Math.sign(angleDelta) * ROTATION_SPEED_DEGREES)
-  //   }
+  // if (Phaser.Math.Within(angleDelta, 0, TOLERANCE)) {
+  //   snake.head.rotation = angleToPointer
+  //   snake.head.setAngularVelocity(0)
+  // } else {
+  //   snake.head.setAngularVelocity(Math.sign(angleDelta) * ROTATION_SPEED_DEGREES)
+  // }
 }

@@ -36,7 +36,7 @@ export default class extends Phaser.GameObjects.Sprite {
     // this.shadow = new Shadow(this.scene, this.sections, this.scale);
 
     // this.sectionGroup = this.scene.physics.add.group()
-    this.sectionGroup = this.scene.add.container(x, y)
+    this.sectionGroup = this.scene.add.container(0, 0)
     // add nick name
     nickName = localStorage.getItem('username')
     this.textPosition = this.scene.add.text(x, y, nickName, {
@@ -62,7 +62,18 @@ export default class extends Phaser.GameObjects.Sprite {
 
     // add 30 sections behind the head
     this.initSections(9)
+    this.tween = []
 
+    this.sections.forEach((sec) => {
+      const tween = this.scene.tweens.add({
+        targets: sec,
+        x: 0,
+        y: 0,
+        ease: 'Linear',
+        duration: 1000
+      })
+      this.tween.push(tween)
+    })
     // init eyes
     // this.eyes = new EyePair(this.scene, this.head, this.scale);
 
@@ -81,7 +92,7 @@ export default class extends Phaser.GameObjects.Sprite {
     this.edge.alpha = 0
     // this.scene.physics.p2.enable(this.edge, this.debug)
     this.edge.body.setCircle(this.edgeOffset)
-
+    console.log(this.tween)
     // constrain edge to the front of the head
     // this.edgeLock = this.scene.physics.p2.createLockConstraint(
     //     this.edge.body,
@@ -158,7 +169,24 @@ export default class extends Phaser.GameObjects.Sprite {
     //     this.scene.input.mousePointer.y - this.head.y
     //   )
     // }
+    for (let i = 0; i < this.tween.length; i++) {
+      this.tween[i].play()
+      if (this.tween[i].isPlaying() && this.scene.sections) {
+        this.tween[i].updateTo('x', this.scene.sections[i].x, true)
+        this.tween[i].updateTo('y', this.scene.sections[i].y, true)
+      }
+    }
 
+    // this.tween.play()
+    // if (this.tween.isPlaying()) {
+
+    // if (this.scene.sections) {
+    // snake.head.x = this.sections[0].x
+    // snake.head.y = this.sections[0].y
+    // this.tween.updateTo('x', this.scene.sections[0].x, true)
+    // this.tween.updateTo('y', this.scene.sections[0].y, true)
+    // }
+    // }
     this.textPosition.setPosition(this.head.body.x, this.head.body.y - 16)
 
     const point = this.headPath.pop()
@@ -172,23 +200,21 @@ export default class extends Phaser.GameObjects.Sprite {
     let lastIndex = null
 
     for (let i = 0; i < this.snakeLength; i++) {
-      // console.log(this.sections[i].body.x, this.sections[i].body.y)
-      this.sections[i].body.x = this.headPath[index].x
-      this.sections[i].body.y = this.headPath[index].y
-      if (this.scene.game.snakes.indexOf(this) === 0) {
-        if (this.scene.sections) {
-          // console.log(`Section: ${i}: Old - X:${this.sections[i].body.x}, Y:${this.sections[i].body.y} vs New - X:${this.scene.sections[i].x}, Y:${this.scene.sections[i].y} `)
-          // this.sections[i].body.x = this.scene.sections[i].x
-          // this.sections[i].body.y = this.scene.sections[i].y
-        }
-        // } else {
-        //   const index = this.scene.game.snakes.indexOf(this)
-        //   if (this.scene.otherSnakesSections) {
+      // this.sections[i].body.x = this.headPath[index].x
+      // this.sections[i].body.y = this.headPath[index].y
+
+      if (this.scene.sections) {
+        // console.log(`Section: ${i}: Old - X:${this.sections[i].body.x}, Y:${this.sections[i].body.y} vs New - X:${this.scene.sections[i].x}, Y:${this.scene.sections[i].y} `)
+        // this.sections[i].body.x = this.scene.sections[i].x
+        // this.sections[i].body.y = this.scene.sections[i].y
+      }
+      // } else {
+      //   const index = this.scene.game.snakes.indexOf(this)
+      //   if (this.scene.otherSnakesSections) {
 
       //     this.sections[i].body.x = this.scene.otherSnakesSections[index][i].x
       //     this.sections[i].body.y = this.scene.otherSnakesSections[index][i].y
       //   }
-      }
 
       // hide sections if they are at same pos
       if (lastIndex && index === lastIndex) {
@@ -212,21 +238,21 @@ export default class extends Phaser.GameObjects.Sprite {
 
     // this calls onCycleComplete every time a cycle is completed.
 
-    let i = 0
-    let found = false
-    while (
-      this.headPath[i].x !== this.sections[1].body.x &&
-      this.headPath[i].y !== this.sections[1].body.y
-    ) {
-      if (
-        this.headPath[i].x === this.lastHeadPosition.x &&
-        this.headPath[i].y === this.lastHeadPosition.y
-      ) {
-        found = true
-        break
-      }
-      i++
-    }
+    const i = 0
+    const found = false
+    // while (
+    //   this.headPath[i].x !== this.sections[1].body.x &&
+    //   this.headPath[i].y !== this.sections[1].body.y
+    // ) {
+    //   if (
+    //     this.headPath[i].x === this.lastHeadPosition.x &&
+    //     this.headPath[i].y === this.lastHeadPosition.y
+    //   ) {
+    //     found = true
+    //     break
+    //   }
+    //   i++
+    // }
     if (!found) {
       this.lastHeadPosition = new Phaser.Geom.Point(
         this.head.body.x,
