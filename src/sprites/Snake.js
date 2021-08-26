@@ -36,7 +36,7 @@ export default class extends Phaser.GameObjects.Sprite {
     // this.shadow = new Shadow(this.scene, this.sections, this.scale);
 
     // this.sectionGroup = this.scene.physics.add.group()
-    this.sectionGroup = this.scene.add.container(x, y)
+    this.sectionGroup = this.scene.add.container(0, 0)
     // add nick name
     nickName = localStorage.getItem('username')
     this.textPosition = this.scene.add.text(x, y, nickName, {
@@ -61,7 +61,7 @@ export default class extends Phaser.GameObjects.Sprite {
     )
 
     // add 30 sections behind the head
-    this.initSections(40)
+    this.initSections(9)
 
     // init eyes
     // this.eyes = new EyePair(this.scene, this.head, this.scale);
@@ -132,10 +132,10 @@ export default class extends Phaser.GameObjects.Sprite {
 
   initSections (num) {
     for (let i = 1; i <= num; i++) {
-      const x = this.head.body.x
-      const y = this.head.body.y + i * this.preferredDistance
+      const x = 418
+      const y = 212 + i * this.preferredDistance
       this.addSectionAtPosition(x, y)
-
+      console.log('init', this.head.body.y, this.head.y);
       this.headPath.push(new Phaser.Geom.Point(x, y))
     }
   }
@@ -144,7 +144,7 @@ export default class extends Phaser.GameObjects.Sprite {
     this.queuedSections += amount
   }
 
-  update () {
+  update (snakeDataUpdate) {
     // const angle = Phaser.Math.Angle.Between(
     //   this.head.x,
     //   this.head.y,
@@ -164,63 +164,66 @@ export default class extends Phaser.GameObjects.Sprite {
     // }
     // const speed = this.speed;
     // this.head.body.moveForward(speed);
-    this.textPosition.setPosition(this.head.body.x, this.head.body.y - 16)
-    const point = this.headPath.pop()
-    point.setTo(this.head.body.x, this.head.body.y)
-    this.headPath.unshift(point)
+    // this.textPosition.setPosition(this.head.body.x, this.head.body.y - 16)
+    // const point = this.headPath.pop()
+    // point.setTo(this.head.body.x, this.head.body.y)
+    // console.log("22222", point);
+    // this.headPath.unshift(point)
     // place each section of the snake on the path of the snake head
     // certain distance from the section before it
-    let index = 0
-    let lastIndex = null
-    for (let i = 0; i < this.snakeLength; i++) {
-      this.sections[i].body.x = this.headPath[index].x
-      this.sections[i].body.y = this.headPath[index].y
+    // let index = 0
+   // let lastIndex = null
+    for (let i = 1; i < snakeDataUpdate.length; i++) {
+      this.sections[i].body.x = snakeDataUpdate[i].X
+      this.sections[i].body.y = snakeDataUpdate[i].Y
 
       // hide sections if they are at same pos
-      if (lastIndex && index === lastIndex) {
-        this.sections[i].alpha = 0
-      } else {
-        this.sections[i].alpha = 1
-      }
+      // if (lastIndex && index === lastIndex) {
+      //   this.sections[i].alpha = 0
+      // } else {
+      //   this.sections[i].alpha = 1
+      // }
 
-      lastIndex = index
+      //lastIndex = index
       // this finds the index in the head path array that the next point
       // should be at
-      index = this.findNextPointIndex(index)
+     // index = this.findNextPointIndex(index)
+     // console.log(index, this.headPath[index].x, this.headPath[index].y);
     }
+   // console.log('endloop', new Date().getSeconds());
 
     // continuously adjust the size of the head path
-    if (index >= this.headPath.length - 1) {
-      const lastPos = this.headPath[this.headPath.length - 1]
-      this.headPath.push(new Phaser.Geom.Point(lastPos.x, lastPos.y))
-    } else {
-      this.headPath.pop()
-    }
+    // if (index >= this.headPath.length - 1) {
+    //   const lastPos = this.headPath[this.headPath.length - 1]
+    //   this.headPath.push(new Phaser.Geom.Point(lastPos.x, lastPos.y))
+    // } else {
+    //   this.headPath.pop()
+    // }
 
     // this calls onCycleComplete every time a cycle is completed.
 
-    let i = 0
-    let found = false
-    while (
-      this.headPath[i].x !== this.sections[1].body.x &&
-      this.headPath[i].y !== this.sections[1].body.y
-    ) {
-      if (
-        this.headPath[i].x === this.lastHeadPosition.x &&
-        this.headPath[i].y === this.lastHeadPosition.y
-      ) {
-        found = true
-        break
-      }
-      i++
-    }
-    if (!found) {
-      this.lastHeadPosition = new Phaser.Geom.Point(
-        this.head.body.x,
-        this.head.body.y
-      )
-      this.onCycleComplete()
-    }
+    // let i = 0
+    // let found = false
+    // while (
+    //   this.headPath[i].x !== this.sections[1].body.x &&
+    //   this.headPath[i].y !== this.sections[1].body.y
+    // ) {
+    //   if (
+    //     this.headPath[i].x === this.lastHeadPosition.x &&
+    //     this.headPath[i].y === this.lastHeadPosition.y
+    //   ) {
+    //     found = true
+    //     break
+    //   }
+    //   i++
+    // }
+    // if (!found) {
+    //   this.lastHeadPosition = new Phaser.Geom.Point(
+    //     this.head.body.x,
+    //     this.head.body.y
+    //   )
+    //   this.onCycleComplete()
+    // }
 
     // update the eyes
     // this.eyes.update();

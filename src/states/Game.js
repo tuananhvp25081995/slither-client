@@ -14,11 +14,11 @@ const SPEED = 200
 const ROTATION_SPEED = 1.5 * Math.PI
 const ROTATION_SPEED_DEGREES = Phaser.Math.RadToDeg(ROTATION_SPEED)
 const TOLERANCE = 0.02 * ROTATION_SPEED
+let snakeDataUpdate = []
 
 const velocityFromRotation = Phaser.Physics.Arcade.ArcadePhysics.prototype.velocityFromRotation
 
 export default class Game extends Phaser.Scene {
-
   preload () {}
 
   create () {
@@ -26,7 +26,7 @@ export default class Game extends Phaser.Scene {
     socket = new WebSocket(`ws://66.42.51.96/ws/${name}`)
     const getSocket = () => {
       socket.onopen = () => {
-        heartbeat()
+        // heartbeat()
       }
       socket.onclose = () => {
         getSocket()
@@ -36,19 +36,26 @@ export default class Game extends Phaser.Scene {
       }
       socket.onmessage = (e) => {
         const data = JSON.parse(e.data)
-        // console.log(data)
-        // webSocketAction[data.action](data)
+       // console.log(data)
+        webSocketAction[data.Action](data)
       }
     }
-    const heartbeat = () => {
-      if (!socket) return
-      socket.send('Ping')
-      setTimeout(heartbeat, 5000)
-    }
+    // const heartbeat = () => {
+    //   if (!socket) return
+    //   socket.send('Ping')
+    //   setTimeout(heartbeat, 5000)
+    // }
     const webSocketAction = {
-      CircleSnake: (data) => {
-        // console.log(data)
-        // goatData.holder = data;
+      'snake-data': (data) => {
+        const dataUpdate = data.Data.filter(player => {
+          return player.Id === name
+        })[0]
+        console.log(dataUpdate)
+        snakeDataUpdate = [...dataUpdate.CircleSnake]
+      },
+
+      'food-data': (data) => {
+      //  console.log(data)
       }
     }
 
@@ -61,7 +68,7 @@ export default class Game extends Phaser.Scene {
 
     // Init Snake
     this.game.snakes = []
-    snake = new Snake(this, 0, 0, 'circle')
+    snake = new Snake(this, 430, 230, 'circle')
     this.game.playerSnake = snake
     this.cameras.main.width = gameWidth / 2
     this.cameras.main.height = gameHeight / 2
@@ -119,10 +126,10 @@ export default class Game extends Phaser.Scene {
 
     // slot
     this.slot = new Slot(this, this.cameras.main.width, this.cameras.main.height)
-    //time countdown
-    this.timer = new Timer(this);
+    // time countdown
+    this.timer = new Timer(this)
 
-    this.leaderboard = new Leaderboard(this);
+    this.leaderboard = new Leaderboard(this)
   }
 
   spriteHitHealth (sprite, health) {
@@ -134,9 +141,11 @@ export default class Game extends Phaser.Scene {
   }
 
   update (delta) {
+    console.log('Khoitao', snake.head.body.x, snake.head.body.y)
+    console.log('update', snakeDataUpdate);
     this.slot.update()
     for (let i = this.game.snakes.length - 1; i >= 0; i--) {
-      this.game.snakes[i].update()
+      this.game.snakes[i].update(snakeDataUpdate)
     }
 
     pointerMove(this.input.activePointer.updateWorldPoint(this.cameras.main))
@@ -158,21 +167,20 @@ export default class Game extends Phaser.Scene {
       pointerMove(this.input.activePointer.updateWorldPoint(this.cameras.main))
     }
   }
-  
 }
 function pointerMove (pointer, camera) {
   // if (!pointer.manager.isOver) return;
 
   // Also see alternative method in
   // <https://codepen.io/samme/pen/gOpPLLx>
-  
+
   const angleToPointer = Phaser.Math.Angle.Between(snake.head.x, snake.head.y, pointer.worldX, pointer.worldY)
   const angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - snake.head.rotation)
   const event = {
     event: 'change_target',
     data: {
-      X: pointer.x,
-      Y: pointer.y
+      X: snake.head.body.x,
+      Y: snake.head.body.y
     }
   }
   if (socket.readyState === 1) socket.send(JSON.stringify(event))
