@@ -1,189 +1,186 @@
-/* globals __DEV__ */
 import Phaser from 'phaser'
-import PlayerSnake from '../sprites/PlayerSnake'
-import BotSnake from '../sprites/BotSnake'
-import Food from '../sprites/Food'
-import PowerRunes from '../states/PowerRune'
-import { Util } from '../utils'
-import config from '../config'
-import Sync from '../network/Sync'
+import Snake from '../sprites/Snake'
+import Slot from '../sprites/Slot'
+import Timer from '../sprites/Timer'
 
-export default class extends Phaser.Scene {
-  init () {
-    this.game.desiredFps = 45
-    this.game.sound.mute = config.muteSound
-    this.sync = new Sync(this.game)
-  }
+import CircleBorder from '../sprites/CircleBorder'
+import Leaderboard from '../sprites/Leaderboard'
+let snake
+let Circle
+let healthGroup
+let foodGroup
+let socket
+const SPEED = 200
+const ROTATION_SPEED = 1.5 * Math.PI
+const ROTATION_SPEED_DEGREES = Phaser.Math.RadToDeg(ROTATION_SPEED)
+const TOLERANCE = 0.02 * ROTATION_SPEED
+
+const velocityFromRotation = Phaser.Physics.Arcade.ArcadePhysics.prototype.velocityFromRotation
+
+export default class Game extends Phaser.Scene {
 
   preload () {}
 
   create () {
-    const width = this.game.width
-    const height = this.game.height
-
-    this.game.world.setBounds(-width, -height, width * 2, height * 2)
-    this.game.stage.backgroundColor = '#444'
-
-    // add background
-    this.game.add.tileSprite(
-      -width,
-      -height,
-      this.game.world.width,
-      this.game.world.height,
-      'background'
-    )
-
-    // init physics & groups
-    // this.game.physics.startSystem(Phaser.Physics.P2JS)
-    this.foodGroup = this.game.add.group()
-    // this.snakeHeadCollisionGroup = this.game.physics.p2.createCollisionGroup()
-    // this.foodCollisionGroup = this.game.physics.p2.createCollisionGroup()
-
-    // add food randomly
-    for (let i = 0; i < 100; i++) {
-      this.initFood(
-        Util.randomInt(-width, width),
-        Util.randomInt(-height, height)
-      )
+    const name = localStorage.getItem('username')
+    socket = new WebSocket(`ws://66.42.51.96/ws/${name}`)
+    const getSocket = () => {
+      socket.onopen = () => {
+        heartbeat()
+      }
+      socket.onclose = () => {
+        getSocket()
+      }
+      socket.onerror = (error) => {
+        console.log('Socket Error: ', error)
+      }
+      socket.onmessage = (e) => {
+        const data = JSON.parse(e.data)
+        // console.log(data)
+        // webSocketAction[data.action](data)
+      }
     }
-    for (let i = 0; i < 100; i++) {
-      this.initRunePlus(
-        Util.randomInt(-width, width),
-        Util.randomInt(-height, height),
-        'plus'
-      )
+    const heartbeat = () => {
+      if (!socket) return
+      socket.send('Ping')
+      setTimeout(heartbeat, 5000)
+    }
+    const webSocketAction = {
+      CircleSnake: (data) => {
+        // console.log(data)
+        // goatData.holder = data;
+      }
     }
 
+    console.log(socket)
+    getSocket()
+    // Always add map first. Everything else is added after map.
+    const gameWidth = this.game.config.width
+    const gameHeight = this.game.config.height
+    this.add.tileSprite(0, 0, gameWidth * 3, gameHeight * 3, 'background')
+
+    // Init Snake
     this.game.snakes = []
-
-    // create player
-    const snake = new PlayerSnake(this.game, 'circle', 0, 0)
+    snake = new Snake(this, 0, 0, 'circle')
     this.game.playerSnake = snake
-    this.game.camera.follow(snake.head)
+    this.cameras.main.width = gameWidth / 2
+    this.cameras.main.height = gameHeight / 2
+    this.cameras.main.startFollow(snake.head)
 
-    // create bots
-    new BotSnake(
-      this.game,
-      'atom-circle',
-      Util.randomInt(-width, width),
-      Util.randomInt(-height, height)
-    )
-    new BotSnake(
-      this.game,
-      'orange-circle',
-      Util.randomInt(-width, width),
-      Util.randomInt(-height, height)
-    )
-    new BotSnake(
-      this.game,
-      'yellow-gradient-circle',
-      Util.randomInt(-width, width),
-      Util.randomInt(-height, height)
-    )
-    new BotSnake(
-      this.game,
-      'green-circle',
-      Util.randomInt(-width, width),
-      Util.randomInt(-height, height)
-    )
-    new BotSnake(
-      this.game,
-      'green-circle',
-      Util.randomInt(-width, width),
-      Util.randomInt(-height, height)
-    )
-    new BotSnake(
-      this.game,
-      'atom-circle',
-      Util.randomInt(-width, width),
-      Util.randomInt(-height, height)
-    )
-    new BotSnake(
-      this.game,
-      'orange-circle',
-      Util.randomInt(-width, width),
-      Util.randomInt(-height, height)
-    )
-    new BotSnake(
-      this.game,
-      'yellow-gradient-circle',
-      Util.randomInt(-width, width),
-      Util.randomInt(-height, height)
-    )
+    // plusRunes = new PowerRune(this, snake.head, 'plus', 10, { x: -100, y: -100 }, { x: 750, y: 550 });
+    //  When the player sprite his the health packs, call this function ...
+    // this.physics.add.overlap(snake.head, plusRunes.healthGroup, plusRunes.spriteHitHealth());
+    //
+    foodGroup = this.physics.add.staticGroup({
+      key: 'food',
+      frameQuantity: 100,
+      immovable: true
+      // setScale: { x: 0.1, y: 0.1 }
+    })
+    healthGroup = this.physics.add.staticGroup({
+      key: 'plus',
+      frameQuantity: 10,
+      immovable: true,
+      setScale: { x: 0.1, y: 0.1 }
+    })
 
-    // initialize snake groups and collision
-    for (let i = 0; i < this.game.snakes.length; i++) {
-      const snake = this.game.snakes[i]
-      snake.head.body.setCollisionGroup(this.snakeHeadCollisionGroup)
-      snake.head.body.collides([this.foodCollisionGroup])
-      // callback for when a snake is destroyed
-      snake.addDestroyedCallback(this.snakeDestroyed, this)
+    const children = healthGroup.getChildren()
+    const childrenFood = foodGroup.getChildren()
+    for (let i = 0; i < children.length; i++) {
+      const x = Phaser.Math.Between(200, 550)
+      const y = Phaser.Math.Between(200, 850)
+
+      childrenFood[i].setPosition(x, y)
+    }
+    for (let i = 0; i < children.length; i++) {
+      const x = Phaser.Math.Between(1000, 1750)
+      const y = Phaser.Math.Between(1000, 1550)
+
+      children[i].setPosition(x, y)
     }
 
-    this.game.time.events.loop(
-      Phaser.Timer.SECOND,
-      this.updatePosition,
-      this
-    )
+    healthGroup.refresh()
+    foodGroup.refresh()
+    //  When the player sprite hits the foods, call this function ...
+    this.physics.add.overlap(snake.head, foodGroup, this.spriteHitFood)
+    this.physics.add.overlap(snake.head, healthGroup, this.spriteHitHealth)
+    // minimap
+    const minimapSize = gameWidth / 20
+    this.minimap = this.cameras.add(this.cameras.main.width - minimapSize, this.cameras.main.height - minimapSize, minimapSize, minimapSize).setZoom(0.016)
+    this.minimap.setBackgroundColor(0xffffff)
+
+    // create Circle
+    // Circle = CircleBorder.createCircle(this, gameWidth / 2)
+
+    Circle = new CircleBorder(this, gameWidth / 2, { x: -gameWidth / 2, y: -gameHeight / 2 })
+
+    // resize Circle
+    Circle.resize(5000, 0.75)
+
+    // slot
+    this.slot = new Slot(this, this.cameras.main.width, this.cameras.main.height)
+    //time countdown
+    this.timer = new Timer(this);
+
+    this.leaderboard = new Leaderboard(this);
   }
 
-  updatePosition () {
-    const mousePosX = this.game.input.activePointer.worldX
-    const mousePosY = this.game.input.activePointer.worldY
-    const snakeX = this.game.playerSnake.head.x
-    const snakeY = this.game.playerSnake.head.y
-    // console.log(mousePosX, mousePosY);
-    this.sync.updatePos(mousePosX, mousePosY, snakeX, snakeY)
+  spriteHitHealth (sprite, health) {
+    healthGroup.killAndHide(health)
   }
 
-  initFood (x, y) {
-    const f = new Food(this.game, x, y)
-    f.sprite.body.setCollisionGroup(this.foodCollisionGroup)
-    this.foodGroup.add(f.sprite)
-    f.sprite.body.collides([this.snakeHeadCollisionGroup])
-    return f
+  spriteHitFood (sprite, health) {
+    foodGroup.killAndHide(health)
   }
 
-  initRunePlus (x, y, type) {
-    const rune = new PowerRunes(this.game, x, y, type)
-    rune.sprite.body.setCollisionGroup(this.foodCollisionGroup)
-    this.foodGroup.add(rune.sprite)
-    rune.sprite.body.collides([this.snakeHeadCollisionGroup])
-    return rune
-  }
-
-  snakeDestroyed (snake) {
-    // place food where snake was destroyed
-    for (
-      let i = 0;
-      i < snake.headPath.length;
-      i += Math.round(snake.headPath.length / snake.snakeLength) * 2
-    ) {
-      this.initFood(
-        snake.headPath[i].x + Util.randomInt(-10, 10),
-        snake.headPath[i].y + Util.randomInt(-10, 10)
-      )
-    }
-  }
-
-  update () {
-    // update game components
+  update (delta) {
+    this.slot.update()
     for (let i = this.game.snakes.length - 1; i >= 0; i--) {
       this.game.snakes[i].update()
     }
 
-    for (let i = this.foodGroup.children.length - 1; i >= 0; i--) {
-      const f = this.foodGroup.children[i]
-      f.food.update()
-    }
-    // const rune = new PowerRunes;
-    // rune.update();
-  }
+    pointerMove(this.input.activePointer.updateWorldPoint(this.cameras.main))
+    velocityFromRotation(snake.head.rotation, SPEED, snake.head.body.velocity)
+    snake.head.body.debugBodyColor = (snake.head.body.angularVelocity === 0) ? 0xff0000 : 0xffff00
+    const overlap = this.physics.world.overlap(Circle, snake.head)
+    if (!overlap) {
+      // console.log('outside')
+      const angleToPointer = Phaser.Math.Angle.Between(snake.head.x, snake.head.y, Circle.body.center.x, Circle.body.center.y)
+      const angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - snake.head.rotation)
 
-  render () {
-    if (__DEV__) {
-      // this.game.debug.spriteInfo(this.mushroom, 32, 32)
-      this.game.debug.inputInfo(32, 32)
+      if (Phaser.Math.Within(angleDelta, 0, TOLERANCE)) {
+        snake.head.rotation = angleToPointer
+        snake.head.setAngularVelocity(0)
+      } else {
+        snake.head.setAngularVelocity(Math.sign(angleDelta) * ROTATION_SPEED_DEGREES)
+      }
+    } else {
+      pointerMove(this.input.activePointer.updateWorldPoint(this.cameras.main))
     }
+  }
+  
+}
+function pointerMove (pointer, camera) {
+  // if (!pointer.manager.isOver) return;
+
+  // Also see alternative method in
+  // <https://codepen.io/samme/pen/gOpPLLx>
+  
+  const angleToPointer = Phaser.Math.Angle.Between(snake.head.x, snake.head.y, pointer.worldX, pointer.worldY)
+  const angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - snake.head.rotation)
+  const event = {
+    event: 'change_target',
+    data: {
+      X: pointer.x,
+      Y: pointer.y
+    }
+  }
+  if (socket.readyState === 1) socket.send(JSON.stringify(event))
+
+  if (Phaser.Math.Within(angleDelta, 0, TOLERANCE)) {
+    snake.head.rotation = angleToPointer
+    snake.head.setAngularVelocity(0)
+  } else {
+    snake.head.setAngularVelocity(Math.sign(angleDelta) * ROTATION_SPEED_DEGREES)
   }
 }
