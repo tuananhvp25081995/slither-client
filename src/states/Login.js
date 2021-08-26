@@ -2,7 +2,7 @@ import Phaser from 'phaser'
 
 export default class Login extends Phaser.Scene {
   preload () {
-    this.load.html('loginform', 'assets/html/login.html')
+    
   }
 
   create () {
@@ -21,7 +21,7 @@ export default class Login extends Phaser.Scene {
         const inputText = this.getChildByName('usernameField').value
         if (inputText !== '') {
           localStorage.setItem('username', inputText)
-          this.scene.scene.start('boot')
+          this.scene.scene.start('game')
         }
       }
     })

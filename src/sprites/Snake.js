@@ -62,18 +62,6 @@ export default class extends Phaser.GameObjects.Sprite {
 
     // add 30 sections behind the head
     this.initSections(9)
-    this.tween = []
-
-    this.sections.forEach((sec) => {
-      const tween = this.scene.tweens.add({
-        targets: sec,
-        x: 0,
-        y: 0,
-        ease: 'Linear',
-        duration: 1000
-      })
-      this.tween.push(tween)
-    })
     // init eyes
     // this.eyes = new EyePair(this.scene, this.head, this.scale);
 
@@ -143,10 +131,10 @@ export default class extends Phaser.GameObjects.Sprite {
 
   initSections (num) {
     for (let i = 1; i <= num; i++) {
-      const x = this.head.body.x
-      const y = this.head.body.y + i * this.preferredDistance
+      const x = 418
+      const y = 212 + i * this.preferredDistance
       this.addSectionAtPosition(x, y)
-
+      console.log('init', this.head.body.y, this.head.y)
       this.headPath.push(new Phaser.Geom.Point(x, y))
     }
   }
@@ -155,7 +143,7 @@ export default class extends Phaser.GameObjects.Sprite {
     this.queuedSections += amount
   }
 
-  update () {
+  update (snakeDataUpdate) {
     // const angle = Phaser.Math.Angle.Between(
     //   this.head.x,
     //   this.head.y,
@@ -169,77 +157,48 @@ export default class extends Phaser.GameObjects.Sprite {
     //     this.scene.input.mousePointer.y - this.head.y
     //   )
     // }
-    for (let i = 0; i < this.tween.length; i++) {
-      this.tween[i].play()
-      if (this.tween[i].isPlaying() && this.scene.sections) {
-        this.tween[i].updateTo('x', this.scene.sections[i].x, true)
-        this.tween[i].updateTo('y', this.scene.sections[i].y, true)
-      }
-    }
-
-    // this.tween.play()
-    // if (this.tween.isPlaying()) {
-
-    // if (this.scene.sections) {
-    // snake.head.x = this.sections[0].x
-    // snake.head.y = this.sections[0].y
-    // this.tween.updateTo('x', this.scene.sections[0].x, true)
-    // this.tween.updateTo('y', this.scene.sections[0].y, true)
-    // }
-    // }
-    this.textPosition.setPosition(this.head.body.x, this.head.body.y - 16)
-
-    const point = this.headPath.pop()
-    point.setTo(this.head.body.x, this.head.body.y)
-    // point.setTo(this.scene.sections[0].x, this.scene.sections[0].y)
-    this.headPath.unshift(point)
-
+    // const speed = this.speed;
+    // this.head.body.moveForward(speed);
+    // this.textPosition.setPosition(this.head.body.x, this.head.body.y - 16)
+    // const point = this.headPath.pop()
+    // point.setTo(this.head.body.x, this.head.body.y)
+    // console.log("22222", point);
+    // this.headPath.unshift(point)
     // place each section of the snake on the path of the snake head
     // certain distance from the section before it
-    let index = 0
-    let lastIndex = null
-
-    for (let i = 0; i < this.snakeLength; i++) {
-      // this.sections[i].body.x = this.headPath[index].x
-      // this.sections[i].body.y = this.headPath[index].y
-
-      if (this.scene.sections) {
-        // console.log(`Section: ${i}: Old - X:${this.sections[i].body.x}, Y:${this.sections[i].body.y} vs New - X:${this.scene.sections[i].x}, Y:${this.scene.sections[i].y} `)
-        // this.sections[i].body.x = this.scene.sections[i].x
-        // this.sections[i].body.y = this.scene.sections[i].y
-      }
-      // } else {
-      //   const index = this.scene.game.snakes.indexOf(this)
-      //   if (this.scene.otherSnakesSections) {
-
-      //     this.sections[i].body.x = this.scene.otherSnakesSections[index][i].x
-      //     this.sections[i].body.y = this.scene.otherSnakesSections[index][i].y
-      //   }
+    // let index = 0
+    // let lastIndex = null
+    for (let i = 1; i < snakeDataUpdate.length; i++) {
+      this.sections[i].body.x = snakeDataUpdate[i].X
+      this.sections[i].body.y = snakeDataUpdate[i].Y
 
       // hide sections if they are at same pos
-      if (lastIndex && index === lastIndex) {
-        this.sections[i].alpha = 0
-      } else {
-        this.sections[i].alpha = 1
-      }
+      // if (lastIndex && index === lastIndex) {
+      //   this.sections[i].alpha = 0
+      // } else {
+      //   this.sections[i].alpha = 1
+      // }
 
-      lastIndex = index
-      // this finds the index in the head path array that the next point should be at
-      index = this.findNextPointIndex(index)
+      // lastIndex = index
+      // this finds the index in the head path array that the next point
+      // should be at
+      // index = this.findNextPointIndex(index)
+      // console.log(index, this.headPath[index].x, this.headPath[index].y);
     }
+    // console.log('endloop', new Date().getSeconds());
 
     // continuously adjust the size of the head path
-    if (index >= this.headPath.length - 1) {
-      const lastPos = this.headPath[this.headPath.length - 1]
-      this.headPath.push(new Phaser.Geom.Point(lastPos.x, lastPos.y))
-    } else {
-      this.headPath.pop()
-    }
+    // if (index >= this.headPath.length - 1) {
+    //   const lastPos = this.headPath[this.headPath.length - 1]
+    //   this.headPath.push(new Phaser.Geom.Point(lastPos.x, lastPos.y))
+    // } else {
+    //   this.headPath.pop()
+    // }
 
     // this calls onCycleComplete every time a cycle is completed.
 
-    const i = 0
-    const found = false
+    // let i = 0
+    // let found = false
     // while (
     //   this.headPath[i].x !== this.sections[1].body.x &&
     //   this.headPath[i].y !== this.sections[1].body.y
@@ -253,13 +212,13 @@ export default class extends Phaser.GameObjects.Sprite {
     //   }
     //   i++
     // }
-    if (!found) {
-      this.lastHeadPosition = new Phaser.Geom.Point(
-        this.head.body.x,
-        this.head.body.y
-      )
-      this.onCycleComplete()
-    }
+    // if (!found) {
+    //   this.lastHeadPosition = new Phaser.Geom.Point(
+    //     this.head.body.x,
+    //     this.head.body.y
+    //   )
+    //   this.onCycleComplete()
+    // }
 
     // update the eyes
     // this.eyes.update();
