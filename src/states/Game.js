@@ -18,7 +18,6 @@ const TOLERANCE = 0.02 * ROTATION_SPEED
 const velocityFromRotation = Phaser.Physics.Arcade.ArcadePhysics.prototype.velocityFromRotation
 
 export default class Game extends Phaser.Scene {
-
   preload () {}
 
   create () {
@@ -36,8 +35,7 @@ export default class Game extends Phaser.Scene {
       }
       socket.onmessage = (e) => {
         const data = JSON.parse(e.data)
-        // console.log(data)
-        // webSocketAction[data.action](data)
+        webSocketAction[data.Action](data.Data)
       }
     }
     const heartbeat = () => {
@@ -46,9 +44,12 @@ export default class Game extends Phaser.Scene {
       setTimeout(heartbeat, 5000)
     }
     const webSocketAction = {
-      CircleSnake: (data) => {
-        // console.log(data)
-        // goatData.holder = data;
+      'snake-data': (data) => {
+        console.log(data)
+      },
+
+      'food-data': (data) => {
+        console.log(data)
       }
     }
 
@@ -119,10 +120,10 @@ export default class Game extends Phaser.Scene {
 
     // slot
     this.slot = new Slot(this, this.cameras.main.width, this.cameras.main.height)
-    //time countdown
-    this.timer = new Timer(this);
+    // time countdown
+    this.timer = new Timer(this)
 
-    this.leaderboard = new Leaderboard(this);
+    this.leaderboard = new Leaderboard(this)
   }
 
   spriteHitHealth (sprite, health) {
@@ -158,14 +159,13 @@ export default class Game extends Phaser.Scene {
       pointerMove(this.input.activePointer.updateWorldPoint(this.cameras.main))
     }
   }
-  
 }
 function pointerMove (pointer, camera) {
   // if (!pointer.manager.isOver) return;
 
   // Also see alternative method in
   // <https://codepen.io/samme/pen/gOpPLLx>
-  
+
   const angleToPointer = Phaser.Math.Angle.Between(snake.head.x, snake.head.y, pointer.worldX, pointer.worldY)
   const angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - snake.head.rotation)
   const event = {
