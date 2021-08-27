@@ -19,8 +19,12 @@ const TOLERANCE = 0.02 * ROTATION_SPEED
 const velocityFromRotation = Phaser.Physics.Arcade.ArcadePhysics.prototype.velocityFromRotation
 
 export default class Game extends Phaser.Scene {
+<<<<<<< HEAD
 
   preload() { }
+=======
+  preload () {}
+>>>>>>> b3da031b09e752c4fa1def0a5c01c610d2ec3ccf
 
   create() {
     const name = localStorage.getItem('username')
@@ -35,8 +39,8 @@ export default class Game extends Phaser.Scene {
       socket.onerror = (error) => {
         console.log('Socket Error: ', error)
       }
-      socket.onmessage = e => {
-        let data = JSON.parse(e.data)
+      socket.onmessage = (e) => {
+        const data = JSON.parse(e.data)
         webSocketAction[data.Action](data.Data)
       }
     }
@@ -125,10 +129,10 @@ export default class Game extends Phaser.Scene {
 
     // slot
     this.slot = new Slot(this, this.cameras.main.width, this.cameras.main.height)
-    //time countdown
-    this.timer = new Timer(this);
+    // time countdown
+    this.timer = new Timer(this)
 
-    this.leaderboard = new Leaderboard(this);
+    this.leaderboard = new Leaderboard(this)
   }
 
   spriteHitHealth(sprite, health) {

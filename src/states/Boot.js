@@ -17,9 +17,7 @@ export default class Boot extends Phaser.Scene {
     this.load.html('loginform', 'assets/html/login.html')
   }
 
-  create(){
+  create () {
     this.scene.start('login')
   }
 }
-
-
