@@ -19,12 +19,7 @@ const TOLERANCE = 0.02 * ROTATION_SPEED
 const velocityFromRotation = Phaser.Physics.Arcade.ArcadePhysics.prototype.velocityFromRotation
 
 export default class Game extends Phaser.Scene {
-<<<<<<< HEAD
-
   preload() { }
-=======
-  preload () {}
->>>>>>> b3da031b09e752c4fa1def0a5c01c610d2ec3ccf
 
   create() {
     const name = localStorage.getItem('username')
