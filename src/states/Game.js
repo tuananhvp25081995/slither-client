@@ -11,6 +11,7 @@ let healthGroup
 let foodGroup
 let socket
 let foodData = [];
+let flag = false;
 const SPEED = 200
 const ROTATION_SPEED = 1.5 * Math.PI
 const ROTATION_SPEED_DEGREES = Phaser.Math.RadToDeg(ROTATION_SPEED)
@@ -50,12 +51,17 @@ export default class Game extends Phaser.Scene {
       },
 
       "food-data": (data) => {
-        if (foodData.length != data.length) {
-          console.log(data);
+        console.log(foodData.length, data.length);
+        if (foodData.length == data.length) {
+          // foodGroup.destroy();
+          foodData = [];
+          flag = true;
+        } else {
           foodData = data;
-          // foodData.forEach(e => {
-          //   getFood(this, 'food', 1, e.Radius, { min: -e.X, max: e.X }, { min: -e.Y, max: e.Y });
-          // });
+          flag = false;
+          foodData.forEach(e => {
+            getFood(this, 'food', 1, e.Radius, { min: -e.X, max: e.X }, { min: -e.Y, max: e.Y });
+          });
         }
       },
     }
@@ -161,14 +167,18 @@ export default class Game extends Phaser.Scene {
 
 }
 
-function getFood(game, type, quantity, scale, positionX, positionY) {
 
+function getFood(game, type, quantity, scale, positionX, positionY) {
   foodGroup = game.physics.add.staticGroup({
     key: type,
     frameQuantity: quantity,
     immovable: true,
     setScale: { x: scale / 3, y: scale / 3 }
   })
+  if (flag) {
+    console.log(flag)
+    foodGroup.destroy();
+  }
   const childrenFood = foodGroup.getChildren();
   for (let i = 0; i < childrenFood.length; i++) {
     const x = Phaser.Math.Between(positionX.min, positionX.max)
@@ -176,12 +186,14 @@ function getFood(game, type, quantity, scale, positionX, positionY) {
 
     childrenFood[i].setPosition(x, y)
   }
-  // foodGroup.refresh();
-  // game.physics.add.overlap(snake.head, foodGroup, spriteHitFood)
+  foodGroup.refresh();
+  game.physics.add.overlap(snake.head, foodGroup, spriteHitFood)
+
 }
 // destroy food
 function spriteHitFood(sprite, health) {
-  foodGroup.killAndHide(health)
+  console.log('aaa')
+  // foodGroup.killAndHide(health)
   // foodGroup.destroy();
 }
 function pointerMove(pointer, camera) {
