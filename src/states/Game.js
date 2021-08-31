@@ -5,6 +5,7 @@ import Timer from '../sprites/Timer'
 
 import CircleBorder from '../sprites/CircleBorder'
 import Leaderboard from '../sprites/Leaderboard'
+import { getWs } from '../socket'
 let snake
 let Circle
 let healthGroup
@@ -24,33 +25,18 @@ export default class Game extends Phaser.Scene {
 
   create () {
     const name = localStorage.getItem('username')
-    socket = new WebSocket(`ws://66.42.51.96/ws/${name}`)
-    const getSocket = () => {
-      socket.onopen = () => {
-        // heartbeat()
-      }
-      socket.onclose = () => {
-        getSocket()
-      }
-      socket.onerror = (error) => {
-        console.log('Socket Error: ', error)
-      }
-      socket.onmessage = (e) => {
-        const data = JSON.parse(e.data)
-        // console.log(data)
-        webSocketAction[data.Action](data)
-      }
+    socket = getWs()
+
+    socket.onmessage = (e) => {
+      const data = JSON.parse(e.data)
+      // console.log(data)
+      webSocketAction[data.Action](data)
     }
-    // const heartbeat = () => {
-    //   if (!socket) return
-    //   socket.send('Ping')
-    //   setTimeout(heartbeat, 5000)
-    // }
+
     const webSocketAction = {
       'snake-data': (data) => {
-        const dataUpdate = data.Data.filter(player => {
-          return player.Id === name
-        })[0]
+        console.log(data)
+        const dataUpdate = data.Data.filter(player => player.Id === name)[0]
         console.log(dataUpdate)
         snakeDataUpdate = [...dataUpdate.CircleSnake]
         isUpdate = true
@@ -61,8 +47,6 @@ export default class Game extends Phaser.Scene {
       }
     }
 
-    console.log(socket)
-    getSocket()
     // Always add map first. Everything else is added after map.
     const gameWidth = this.game.config.width
     const gameHeight = this.game.config.height

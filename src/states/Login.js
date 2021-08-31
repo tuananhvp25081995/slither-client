@@ -6,7 +6,7 @@ export default class Login extends Phaser.Scene {
   }
 
   create () {
-    console.log('login');
+    console.log('login')
     this.cameras.main.setBackgroundColor(0x161c22)
 
     const x = window.innerWidth / 2
