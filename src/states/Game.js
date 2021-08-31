@@ -155,7 +155,6 @@ function getFood (game, type, quantity, scale, positionX, positionY) {
     setScale: { x: scale / 3, y: scale / 3 }
   })
   if (flag) {
-    console.log(flag)
     foodGroup.destroy()
   } else {
     const childrenFood = foodGroup.getChildren()

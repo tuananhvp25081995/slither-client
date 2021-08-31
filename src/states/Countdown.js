@@ -20,13 +20,10 @@ export default class Countdown extends Phaser.Scene {
     const webSocketAction = {
       'count-down': (data) => {
         this.notice.setText(data)
-        console.log(data)
         if (data === 'Match start after 0 Minutes, 1 Seconds \n') {
           this.scene.start('game')
         }
       }
     }
-
-    console.log(socket)
   }
 }

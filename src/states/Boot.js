@@ -18,7 +18,6 @@ export default class Boot extends Phaser.Scene {
   }
 
   create () {
-    console.log('boot');
     this.scene.start('login')
   }
 }
