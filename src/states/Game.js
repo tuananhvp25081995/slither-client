@@ -52,16 +52,17 @@ export default class Game extends Phaser.Scene {
 
       "food-data": (data) => {
         console.log(foodData.length, data.length);
-        if (foodData.length == data.length) {
+        if (foodData.length != data.length) {
           // foodGroup.destroy();
-          foodData = [];
-          flag = true;
-        } else {
+          // foodData = [];
           foodData = data;
-          flag = false;
+          // flag = true;
           foodData.forEach(e => {
             getFood(this, 'food', 1, e.Radius, { min: -e.X, max: e.X }, { min: -e.Y, max: e.Y });
           });
+        } else {
+          // foodData = [];
+          flag = true;
         }
       },
     }
@@ -93,7 +94,6 @@ export default class Game extends Phaser.Scene {
     //     // getFood(this, 'food', 1, foodData.Radius, { min: -foodData.X, max: foodData.X }, { min: -foodData.Y, max: foodData.Y });
     //   });
     // }
-
     healthGroup = this.physics.add.staticGroup({
       key: 'plus',
       frameQuantity: 10,
@@ -178,17 +178,17 @@ function getFood(game, type, quantity, scale, positionX, positionY) {
   if (flag) {
     console.log(flag)
     foodGroup.destroy();
-  }
-  const childrenFood = foodGroup.getChildren();
-  for (let i = 0; i < childrenFood.length; i++) {
-    const x = Phaser.Math.Between(positionX.min, positionX.max)
-    const y = Phaser.Math.Between(positionY.min, positionY.max)
+  } else {
+    const childrenFood = foodGroup.getChildren();
+    for (let i = 0; i < childrenFood.length; i++) {
+      const x = Phaser.Math.Between(positionX.min, positionX.max)
+      const y = Phaser.Math.Between(positionY.min, positionY.max)
 
-    childrenFood[i].setPosition(x, y)
+      childrenFood[i].setPosition(x, y)
+    }
+    foodGroup.refresh();
+    game.physics.add.overlap(snake.head, foodGroup, spriteHitFood)
   }
-  foodGroup.refresh();
-  game.physics.add.overlap(snake.head, foodGroup, spriteHitFood)
-
 }
 // destroy food
 function spriteHitFood(sprite, health) {
