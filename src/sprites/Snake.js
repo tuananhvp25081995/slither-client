@@ -94,7 +94,6 @@ export default class extends Phaser.GameObjects.Sprite {
     this.edge.alpha = 0
     // this.scene.physics.p2.enable(this.edge, this.debug)
     this.edge.body.setCircle(this.edgeOffset)
-    console.log(this.tween)
     // constrain edge to the front of the head
     // this.edgeLock = this.scene.physics.p2.createLockConstraint(
     //     this.edge.body,
@@ -145,10 +144,9 @@ export default class extends Phaser.GameObjects.Sprite {
 
   initSections (num) {
     for (let i = 1; i <= num; i++) {
-      const x = 418
-      const y = 212 + i * this.preferredDistance
+      const x = 400
+      const y = 200 + i * this.preferredDistance
       this.addSectionAtPosition(x, y)
-      console.log('init', this.head.body.y, this.head.y)
       this.headPath.push(new Phaser.Geom.Point(x, y))
     }
   }
@@ -158,60 +156,52 @@ export default class extends Phaser.GameObjects.Sprite {
   }
 
   update (snakeDataUpdate) {
-    // const angle = Phaser.Math.Angle.Between(
-    //   this.head.x,
-    //   this.head.y,
-    //   this.scene.input.mousePointer.x,
-    //   this.scene.input.mousePointer.y
-    // )
-    // this.head.setRotation(angle + Math.PI / 2)
-    // if (this.scene.input.mousePointer) {
-    //   this.head.body.setVelocity(
-    //     this.scene.input.mousePointer.x - this.head.x,
-    //     this.scene.input.mousePointer.y - this.head.y
-    //   )
-    // }
-    // const speed = this.speed;
-    // this.head.body.moveForward(speed);
+    console.log('snake Update', snakeDataUpdate)
+
+    if (!snakeDataUpdate) {
+      return
+    }
+    const snakeSections = [...snakeDataUpdate.circleSnake]
+    for (let i = 0; i < snakeSections.length; i++) {
+      this.sections[i].body.x = snakeSections[i].x
+      this.sections[i].body.y = snakeSections[i].y
+      //  this.tween[i].play()
+      // if (this.tween[i].isPlaying() && snakeSections[i]) {
+      //   console.log(snakeSections[i].x, snakeSections[i].y)
+      //   this.tween[i].updateTo('x', snakeSections[i].x, true)
+      //   this.tween[i].updateTo('y', snakeSections[i].x, true)
+      // }
+    }
+
     // this.textPosition.setPosition(this.head.body.x, this.head.body.y - 16)
     // const point = this.headPath.pop()
     // point.setTo(this.head.body.x, this.head.body.y)
-    // console.log("22222", point);
     // this.headPath.unshift(point)
-    // place each section of the snake on the path of the snake head
-    // certain distance from the section before it
+    // // place each section of the snake on the path of the snake head
+    // // certain distance from the section before it
     // let index = 0
     // let lastIndex = null
 
-    for (let i = 0; i < this.tween.length; i++) {
-      this.tween[i].play()
-      if (this.tween[i].isPlaying() && snakeDataUpdate[i]) {
-        console.log(`tween ${i} is playing`)
-        this.tween[i].updateTo('x', snakeDataUpdate[i].X, true)
-        this.tween[i].updateTo('y', snakeDataUpdate[i].Y, true)
-      }
-    }
+    // for (let i = 0; i < this.snakeLength; i++) {
+    //   console.log(this.headPath[index].x, this.headPath[index].y)
+    //   this.sections[i].body.x = this.headPath[index].x
+    //   this.sections[i].body.y = this.headPath[index].y
 
-    for (let i = 1; i < snakeDataUpdate.length; i++) {
-      // this.sections[i].body.x = snakeDataUpdate[i].X
-      // this.sections[i].body.y = snakeDataUpdate[i].Y
+    //   // hide sections if they are at same pos
+    //   if (lastIndex && index === lastIndex) {
+    //     this.sections[i].alpha = 0
+    //   } else {
+    //     this.sections[i].alpha = 1
+    //   }
 
-      // hide sections if they are at same pos
-      // if (lastIndex && index === lastIndex) {
-      //   this.sections[i].alpha = 0
-      // } else {
-      //   this.sections[i].alpha = 1
-      // }
+    //   lastIndex = index
+    //   // this finds the index in the head path array that the next point
+    //   // should be at
+    //   index = this.findNextPointIndex(index)
+    //   // console.log(index, this.headPath[index].x, this.headPath[index].y);
+    // }
 
-      // lastIndex = index
-      // this finds the index in the head path array that the next point
-      // should be at
-      // index = this.findNextPointIndex(index)
-      // console.log(index, this.headPath[index].x, this.headPath[index].y);
-    }
-    // console.log('endloop', new Date().getSeconds());
-
-    // continuously adjust the size of the head path
+    // // continuously adjust the size of the head path
     // if (index >= this.headPath.length - 1) {
     //   const lastPos = this.headPath[this.headPath.length - 1]
     //   this.headPath.push(new Phaser.Geom.Point(lastPos.x, lastPos.y))
@@ -219,7 +209,7 @@ export default class extends Phaser.GameObjects.Sprite {
     //   this.headPath.pop()
     // }
 
-    // this calls onCycleComplete every time a cycle is completed.
+    // // this calls onCycleComplete every time a cycle is completed.
 
     // let i = 0
     // let found = false

@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import { throttle } from 'throttle-debounce'
 import Snake from '../sprites/Snake'
 import Slot from '../sprites/Slot'
 import Timer from '../sprites/Timer'
@@ -10,21 +11,27 @@ let Circle
 let healthGroup
 let foodGroup
 let socket
-const SPEED = 200
+const SPEED = 150
 const ROTATION_SPEED = 1.5 * Math.PI
 const ROTATION_SPEED_DEGREES = Phaser.Math.RadToDeg(ROTATION_SPEED)
 const TOLERANCE = 0.02 * ROTATION_SPEED
-let snakeDataUpdate = []
 let isUpdate = false
 
-const velocityFromRotation = Phaser.Physics.Arcade.ArcadePhysics.prototype.velocityFromRotation
+const RENDER_DELAY = 20
+const gameUpdates = []
+let gameStart = 0
+let firstServerTimestamp = 0
+let isStart = false
+let isInitSnake = false
 
 export default class Game extends Phaser.Scene {
   preload () {}
 
   create () {
+    gameStart = 0
+    firstServerTimestamp = 0
     const name = localStorage.getItem('username')
-    socket = new WebSocket(`ws://66.42.51.96/ws/${name}`)
+    socket = new WebSocket(`ws://127.0.0.1:8080/ws/${name}`)
     const getSocket = () => {
       socket.onopen = () => {
         // heartbeat()
@@ -39,6 +46,7 @@ export default class Game extends Phaser.Scene {
         const data = JSON.parse(e.data)
         // console.log(data)
         webSocketAction[data.Action](data)
+        isStart = true
       }
     }
     // const heartbeat = () => {
@@ -48,11 +56,17 @@ export default class Game extends Phaser.Scene {
     // }
     const webSocketAction = {
       'snake-data': (data) => {
-        const dataUpdate = data.Data.filter(player => {
-          return player.Id === name
+        const meUpdate = data.Data.filter(player => {
+          return player.id === name
         })[0]
-        console.log(dataUpdate)
-        snakeDataUpdate = [...dataUpdate.CircleSnake]
+        const othersUpdate = data.Data.filter(player => {
+          return player.id !== name
+        })
+        processGameUpdate({
+          t: data.T,
+          me: { ...meUpdate },
+          others: [...othersUpdate]
+        })
         isUpdate = true
       },
 
@@ -61,20 +75,14 @@ export default class Game extends Phaser.Scene {
       }
     }
 
-    console.log(socket)
     getSocket()
     // Always add map first. Everything else is added after map.
     const gameWidth = this.game.config.width
     const gameHeight = this.game.config.height
     this.add.tileSprite(0, 0, gameWidth * 3, gameHeight * 3, 'background')
 
-    // Init Snake
-    this.game.snakes = []
-    snake = new Snake(this, 430, 230, 'circle')
-    this.game.playerSnake = snake
     this.cameras.main.width = gameWidth / 2
     this.cameras.main.height = gameHeight / 2
-    this.cameras.main.startFollow(snake.head)
 
     // plusRunes = new PowerRune(this, snake.head, 'plus', 10, { x: -100, y: -100 }, { x: 750, y: 550 });
     //  When the player sprite his the health packs, call this function ...
@@ -111,8 +119,8 @@ export default class Game extends Phaser.Scene {
     healthGroup.refresh()
     foodGroup.refresh()
     //  When the player sprite hits the foods, call this function ...
-    this.physics.add.overlap(snake.head, foodGroup, this.spriteHitFood)
-    this.physics.add.overlap(snake.head, healthGroup, this.spriteHitHealth)
+    // this.physics.add.overlap(snake.head, foodGroup, this.spriteHitFood)
+    // this.physics.add.overlap(snake.head, healthGroup, this.spriteHitHealth)
     // minimap
     const minimapSize = gameWidth / 20
     this.minimap = this.cameras.add(this.cameras.main.width - minimapSize, this.cameras.main.height - minimapSize, minimapSize, minimapSize).setZoom(0.016)
@@ -142,59 +150,132 @@ export default class Game extends Phaser.Scene {
     foodGroup.killAndHide(health)
   }
 
-  update (delta) {
-    console.log('Khoitao', snake.head.body.x, snake.head.body.y)
-    console.log('update', snakeDataUpdate)
+  update (time, delta) {
     if (isUpdate) {
-      this.slot.update()
-      for (let i = this.game.snakes.length - 1; i >= 0; i--) {
-        this.game.snakes[i].update(snakeDataUpdate)
+      if (!isInitSnake) {
+        // Init Snake
+        this.game.snakes = []
+        snake = new Snake(this, 430, 230, 'circle')
+        this.game.playerSnake = snake
+        this.cameras.main.startFollow(snake.head)
+        isInitSnake = true
       }
+      const { me } = getCurrentState()
+      console.log(getCurrentState())
+      this.slot.update()
 
       pointerMove(this.input.activePointer.updateWorldPoint(this.cameras.main))
-      velocityFromRotation(snake.head.rotation, SPEED, snake.head.body.velocity)
-      snake.head.body.debugBodyColor = (snake.head.body.angularVelocity === 0) ? 0xff0000 : 0xffff00
-      const overlap = this.physics.world.overlap(Circle, snake.head)
-      if (!overlap) {
-      // console.log('outside')
-        const angleToPointer = Phaser.Math.Angle.Between(snake.head.x, snake.head.y, Circle.body.center.x, Circle.body.center.y)
-        const angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - snake.head.rotation)
-
-        if (Phaser.Math.Within(angleDelta, 0, TOLERANCE)) {
-          snake.head.rotation = angleToPointer
-          snake.head.setAngularVelocity(0)
-        } else {
-          snake.head.setAngularVelocity(Math.sign(angleDelta) * ROTATION_SPEED_DEGREES)
-        }
-      } else {
-        pointerMove(this.input.activePointer.updateWorldPoint(this.cameras.main))
+      for (let i = this.game.snakes.length - 1; i >= 0; i--) {
+        this.game.snakes[i].update(me)
       }
-
-      isUpdate = false
     }
   }
 }
+
 function pointerMove (pointer, camera) {
-  // if (!pointer.manager.isOver) return;
 
-  // Also see alternative method in
-  // <https://codepen.io/samme/pen/gOpPLLx>
+  if (socket.readyState === 1) {
+    const event = {
+      event: 'change_target',
+      data: {
+        X: pointer.worldX,
+        Y: pointer.worldY
+      }
+    }
+    socket.send(JSON.stringify(event))
+  }
 
-  const angleToPointer = Phaser.Math.Angle.Between(snake.head.x, snake.head.y, pointer.worldX, pointer.worldY)
-  const angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - snake.head.rotation)
-  const event = {
-    event: 'change_target',
-    data: {
-      X: snake.head.body.x,
-      Y: snake.head.body.y
+  // if (Phaser.Math.Within(angleDelta, 0, TOLERANCE)) {
+  //   snake.head.rotation = angleToPointer
+  //   snake.head.setAngularVelocity(0)
+  // } else {
+  //   snake.head.setAngularVelocity(Math.sign(angleDelta) * ROTATION_SPEED_DEGREES)
+  // }
+  // console.log('event end', snake.head.rotation)
+
+  // console.log('velocity', snake.head.body.velocity)
+}
+
+
+function processGameUpdate (update) {
+  if (!firstServerTimestamp) {
+    firstServerTimestamp = update.t
+    gameStart = Date.now()
+  }
+  gameUpdates.push(update)
+
+  // Keep only one game update before the current server time
+  const base = getBaseUpdate()
+  if (base > 0) {
+    gameUpdates.splice(0, base)
+  }
+}
+
+function currentServerTime () {
+  return firstServerTimestamp + (Date.now() - gameStart) - RENDER_DELAY
+}
+
+// Returns the index of the base update, the first game update before
+// current server time, or -1 if N/A.
+function getBaseUpdate () {
+  const serverTime = currentServerTime()
+  for (let i = gameUpdates.length - 1; i >= 0; i--) {
+    if (gameUpdates[i].t <= serverTime) {
+      return i
     }
   }
-  if (socket.readyState === 1) socket.send(JSON.stringify(event))
+  return -1
+}
 
-  if (Phaser.Math.Within(angleDelta, 0, TOLERANCE)) {
-    snake.head.rotation = angleToPointer
-    snake.head.setAngularVelocity(0)
-  } else {
-    snake.head.setAngularVelocity(Math.sign(angleDelta) * ROTATION_SPEED_DEGREES)
+function getCurrentState () {
+  if (!firstServerTimestamp) {
+    return {}
   }
+
+  const base = getBaseUpdate()
+  const serverTime = currentServerTime()
+
+  // If base is the most recent update we have, use its state.
+  // Otherwise, interpolate between its state and the state of (base + 1).
+  if (base < 0 || base === gameUpdates.length - 1) {
+    return gameUpdates[gameUpdates.length - 1]
+  } else {
+    const baseUpdate = gameUpdates[base]
+    const next = gameUpdates[base + 1]
+    console.log(baseUpdate, next)
+    const ratio = (serverTime - baseUpdate.t) / (next.t - baseUpdate.t)
+    return {
+      me: interpolateObject(baseUpdate.me, next.me, ratio),
+      others: interpolateObjectArray(baseUpdate.others, next.others, ratio)
+    }
+  }
+}
+
+function interpolateObject (object1, object2, ratio) {
+  if (!object2) {
+    return object1
+  }
+
+  const interpolated = {}
+  Object.keys(object1).forEach(key => {
+    if (key === 'velocity') {
+      interpolated[key] = interpolateVelocity(object1[key], object2[key], ratio)
+    } else {
+      interpolated[key] = object1[key]
+    }
+    console.log(key, interpolated)
+  })
+  return interpolated
+}
+function interpolateVelocity (object1, object2, ratio) {
+  const interpolated = {}
+  Object.keys(object1).forEach(key => {
+    interpolated[key] = object1[key] + (object2[key] - object1[key]) * ratio
+  })
+
+  return interpolated
+}
+
+function interpolateObjectArray (objects1, objects2, ratio) {
+  return objects1.map(o => interpolateObject(o, objects2.find(o2 => o.id === o2.id), ratio))
 }
