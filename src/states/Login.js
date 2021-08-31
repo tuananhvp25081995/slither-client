@@ -6,6 +6,7 @@ export default class Login extends Phaser.Scene {
   }
 
   create () {
+    console.log('login');
     this.cameras.main.setBackgroundColor(0x161c22)
 
     const x = window.innerWidth / 2
@@ -21,7 +22,7 @@ export default class Login extends Phaser.Scene {
         const inputText = this.getChildByName('usernameField').value
         if (inputText !== '') {
           localStorage.setItem('username', inputText)
-          this.scene.scene.start('game')
+          this.scene.scene.start('countdown')
         }
       }
     })
