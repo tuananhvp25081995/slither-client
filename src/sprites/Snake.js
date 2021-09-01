@@ -32,6 +32,9 @@ export default class extends Phaser.GameObjects.Sprite {
     this.preferredDistance = 17 * this.scale
     this.queuedSections = 0
 
+    this.dotSnake = this.scene.add.circle(10, 10, 100, 0xffffff)
+    this.scene.cameras.main.ignore(this.dotSnake)
+
     // init shadow
     // this.shadow = new Shadow(this.scene, this.sections, this.scale);
 
@@ -172,6 +175,7 @@ export default class extends Phaser.GameObjects.Sprite {
     // certain distance from the section before it
     let index = 0
     let lastIndex = null
+    this.dotSnake.setPosition(this.head.x, this.head.y)
     for (let i = 0; i < this.snakeLength; i++) {
       this.sections[i].body.x = this.headPath[index].x
       this.sections[i].body.y = this.headPath[index].y
