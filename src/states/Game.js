@@ -6,6 +6,7 @@ import Timer from '../sprites/Timer'
 
 import CircleBorder from '../sprites/CircleBorder'
 import Leaderboard from '../sprites/Leaderboard'
+import { getWs } from '../socket'
 let snake
 let Circle
 let healthGroup
@@ -50,11 +51,7 @@ export default class Game extends Phaser.Scene {
         isStart = true
       }
     }
-    // const heartbeat = () => {
-    //   if (!socket) return
-    //   socket.send('Ping')
-    //   setTimeout(heartbeat, 5000)
-    // }
+
     const webSocketAction = {
       'snake-data': (data) => {
         const meUpdate = data.Data.filter(player => {
@@ -177,6 +174,7 @@ export default class Game extends Phaser.Scene {
         }
       }
     }
+    // }
   }
 }
 
