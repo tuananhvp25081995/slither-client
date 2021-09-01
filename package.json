@@ -51,6 +51,7 @@
         "idiom.js": "^1.0.1",
         "phaser": "^3.55.2",
         "phaser-ce": "^2.18.0",
+        "throttle-debounce": "^3.0.1",
         "webfontloader": "^1.6.28"
     },
     "cordova": {

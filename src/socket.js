@@ -32,4 +32,9 @@ export const getWs = () => {
 //   }
 // }
 // const webSocketAction = {
-// 'data-slith
+// 'data-slither': (data) => {
+//   console.log(data)
+//   // goatData.holder = data;
+// }
+
+// window.onload = getSocket()

@@ -1,9 +1,7 @@
 import Phaser from 'phaser'
 
 export default class Login extends Phaser.Scene {
-  preload () {
-
-  }
+  preload () { }
 
   create () {
     this.cameras.main.setBackgroundColor(0x161c22)

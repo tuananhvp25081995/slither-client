@@ -1,10 +1,12 @@
 import Phaser from 'phaser'
+import { throttle } from 'throttle-debounce'
 import Snake from '../sprites/Snake'
 import Slot from '../sprites/Slot'
 import Timer from '../sprites/Timer'
-import { getWs } from '../socket'
+import { getWs, getWs } from '../socket'
 import CircleBorder from '../sprites/CircleBorder'
 import Leaderboard from '../sprites/Leaderboard'
+
 let snake
 let Circle
 let healthGroup
@@ -12,35 +14,59 @@ let foodGroup
 let socket
 let foodData = []
 let flag = false
-const SPEED = 200
+const SPEED = 150
 const ROTATION_SPEED = 1.5 * Math.PI
 const ROTATION_SPEED_DEGREES = Phaser.Math.RadToDeg(ROTATION_SPEED)
 const TOLERANCE = 0.02 * ROTATION_SPEED
+let isUpdate = false
 
-const velocityFromRotation = Phaser.Physics.Arcade.ArcadePhysics.prototype.velocityFromRotation
+const RENDER_DELAY = 20
+const gameUpdates = []
+let gameStart = 0
+let firstServerTimestamp = 0
+let isStart = false
+let isInitSnake = false
+let meTest = {}
 
 export default class Game extends Phaser.Scene {
   preload () { }
 
   create () {
     socket = getWs()
+    gameStart = 0
+    firstServerTimestamp = 0
+    const name = localStorage.getItem('username')
 
     socket.onmessage = (e) => {
       const data = JSON.parse(e.data)
       // console.log(data)
-      webSocketAction[data.Action](data.Data)
+      webSocketAction[data.Action](data)
+      isStart = true
     }
     const webSocketAction = {
       'snake-data': (data) => {
-        // console.log(data)
+        const meUpdate = data.Data.filter(player => {
+          return player.id === name
+        })[0]
+        meTest = { ...meUpdate }
+        console.log('meUpdate', meUpdate)
+        const othersUpdate = data.Data.filter(player => {
+          return player.id !== name
+        })
+        processGameUpdate({
+          t: data.T,
+          me: { ...meUpdate },
+          others: [...othersUpdate]
+        })
+        isUpdate = true
       },
 
       'food-data': (data) => {
-        console.log(foodData.length, data.length)
-        if (foodData.length !== data.length) {
+        console.log(foodData.length, data.Data.length)
+        if (foodData.length !== data.Data.length) {
           // foodGroup.destroy();
           // foodData = [];
-          foodData = data
+          foodData = data.Data
           // flag = true;
           foodData.forEach(e => {
             getFood(this, 'food', 1, e.Radius, { min: -e.X, max: e.X }, { min: -e.Y, max: e.Y })
@@ -59,11 +85,12 @@ export default class Game extends Phaser.Scene {
 
     // Init Snake
     this.game.snakes = []
-    snake = new Snake(this, 0, 0, 'circle')
+    snake = new Snake(this, 430, 230, 'circle')
     this.game.playerSnake = snake
+    this.cameras.main.startFollow(snake.head)
+    isInitSnake = true
     this.cameras.main.width = gameWidth / 2
     this.cameras.main.height = gameHeight / 2
-    this.cameras.main.startFollow(snake.head)
 
     // plusRunes = new PowerRune(this, snake.head, 'plus', 10, { x: -100, y: -100 }, { x: 750, y: 550 });
     //  When the player sprite his the health packs, call this function ...
@@ -121,29 +148,25 @@ export default class Game extends Phaser.Scene {
     healthGroup.killAndHide(health)
   }
 
-  update (delta) {
-    this.slot.update()
-    for (let i = this.game.snakes.length - 1; i >= 0; i--) {
-      this.game.snakes[i].update()
-    }
-    pointerMove(this.input.activePointer.updateWorldPoint(this.cameras.main))
-    velocityFromRotation(snake.head.rotation, SPEED, snake.head.body.velocity)
-    snake.head.body.debugBodyColor = (snake.head.body.angularVelocity === 0) ? 0xff0000 : 0xffff00
-    const overlap = this.physics.world.overlap(Circle, snake.head)
-    if (!overlap) {
-      // console.log('outside')
-      const angleToPointer = Phaser.Math.Angle.Between(snake.head.x, snake.head.y, Circle.body.center.x, Circle.body.center.y)
-      const angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - snake.head.rotation)
+  update (time, delta) {
+    if (isUpdate) {
+      if (isInitSnake) {
+        const { me } = getCurrentState()
+        this.slot.update()
+        for (let i = this.game.snakes.length - 1; i >= 0; i--) {
+          this.game.snakes[i].update(me)
+        }
 
-      if (Phaser.Math.Within(angleDelta, 0, TOLERANCE)) {
-        snake.head.rotation = angleToPointer
-        snake.head.setAngularVelocity(0)
-      } else {
-        snake.head.setAngularVelocity(Math.sign(angleDelta) * ROTATION_SPEED_DEGREES)
+        pointerMove(this.input.activePointer.updateWorldPoint(this.cameras.main))
+        if (Phaser.Math.Within(meTest.angleDelta, 0, TOLERANCE)) {
+          snake.head.rotation = meTest.rotation
+          snake.head.setAngularVelocity(0)
+        } else {
+          snake.head.setAngularVelocity(Math.sign(meTest.angleDelta) * ROTATION_SPEED_DEGREES)
+        }
       }
-    } else {
-      pointerMove(this.input.activePointer.updateWorldPoint(this.cameras.main))
     }
+    // }
   }
 }
 
@@ -175,26 +198,94 @@ function spriteHitFood (sprite, health) {
   // foodGroup.destroy();
 }
 function pointerMove (pointer, camera) {
-  // if (!pointer.manager.isOver) return;
+  if (socket.readyState === 1) {
+    const event = {
+      event: 'change_target',
+      data: {
+        X: pointer.worldX,
+        Y: pointer.worldY
+      }
+    }
+    socket.send(JSON.stringify(event))
+  }
+}
 
-  // Also see alternative method in
-  // <https://codepen.io/samme/pen/gOpPLLx>
+function processGameUpdate (update) {
+  if (!firstServerTimestamp) {
+    firstServerTimestamp = update.t
+    gameStart = Date.now()
+  }
+  gameUpdates.push(update)
 
-  const angleToPointer = Phaser.Math.Angle.Between(snake.head.x, snake.head.y, pointer.worldX, pointer.worldY)
-  const angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - snake.head.rotation)
-  const event = {
-    event: 'change_target',
-    data: {
-      X: pointer.x,
-      Y: pointer.y
+  // Keep only one game update before the current server time
+  const base = getBaseUpdate()
+  if (base > 0) {
+    gameUpdates.splice(0, base)
+  }
+}
+
+function currentServerTime () {
+  return firstServerTimestamp + (Date.now() - gameStart) - RENDER_DELAY
+}
+
+// Returns the index of the base update, the first game update before
+// current server time, or -1 if N/A.
+function getBaseUpdate () {
+  const serverTime = currentServerTime()
+  for (let i = gameUpdates.length - 1; i >= 0; i--) {
+    if (gameUpdates[i].t <= serverTime) {
+      return i
     }
   }
-  if (socket.readyState === 1) socket.send(JSON.stringify(event))
+  return -1
+}
 
-  if (Phaser.Math.Within(angleDelta, 0, TOLERANCE)) {
-    snake.head.rotation = angleToPointer
-    snake.head.setAngularVelocity(0)
-  } else {
-    snake.head.setAngularVelocity(Math.sign(angleDelta) * ROTATION_SPEED_DEGREES)
+function getCurrentState () {
+  if (!firstServerTimestamp) {
+    return {}
   }
+
+  const base = getBaseUpdate()
+  const serverTime = currentServerTime()
+
+  // If base is the most recent update we have, use its state.
+  // Otherwise, interpolate between its state and the state of (base + 1).
+  if (base < 0 || base === gameUpdates.length - 1) {
+    return gameUpdates[gameUpdates.length - 1]
+  } else {
+    const baseUpdate = gameUpdates[base]
+    const next = gameUpdates[base + 1]
+    const ratio = (serverTime - baseUpdate.t) / (next.t - baseUpdate.t)
+    return {
+      me: interpolateObject(baseUpdate.me, next.me, ratio),
+      others: interpolateObjectArray(baseUpdate.others, next.others, ratio)
+    }
+  }
+}
+
+function interpolateObject (object1, object2, ratio) {
+  if (!object2) {
+    return object1
+  }
+
+  const interpolated = {}
+  Object.keys(object1).forEach(key => {
+    if (key === 'circleSnake') {
+      interpolated[key] = interpolateCircleSnake(object1[key], object2[key], ratio)
+    } else {
+      interpolated[key] = object1[key]
+    }
+  })
+  return interpolated
+}
+function interpolateCircleSnake (circleSnakes1, circleSnakes2, ratio) {
+  circleSnakes1.map((i, v) => {
+    return v + (circleSnakes2[i] - v) * ratio
+  })
+
+  return circleSnakes1
+}
+
+function interpolateObjectArray (objects1, objects2, ratio) {
+  return objects1.map(o => interpolateObject(o, objects2.find(o2 => o.id === o2.id), ratio))
 }
