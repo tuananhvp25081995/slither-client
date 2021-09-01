@@ -12,8 +12,8 @@ let Circle
 let healthGroup
 let foodGroup
 let socket
-let foodData = []
-let flag = false
+const foodData = []
+const flag = false
 const SPEED = 150
 const ROTATION_SPEED = 1.5 * Math.PI
 const ROTATION_SPEED_DEGREES = Phaser.Math.RadToDeg(ROTATION_SPEED)
@@ -39,22 +39,23 @@ export default class Game extends Phaser.Scene {
 
     socket.onmessage = (e) => {
       const data = JSON.parse(e.data)
-      // console.log(data)
-      webSocketAction[data.Action](data)
+
+      webSocketAction[data.action](data)
       isStart = true
     }
     const webSocketAction = {
       'snake-data': (data) => {
-        const meUpdate = data.Data.filter(player => {
+        console.log(data)
+        const meUpdate = data.data.filter(player => {
           return player.id === name
         })[0]
         meTest = { ...meUpdate }
         console.log('meUpdate', meUpdate)
-        const othersUpdate = data.Data.filter(player => {
+        const othersUpdate = data.data.filter(player => {
           return player.id !== name
         })
         processGameUpdate({
-          t: data.T,
+          t: data.t,
           me: { ...meUpdate },
           others: [...othersUpdate]
         })
@@ -62,19 +63,19 @@ export default class Game extends Phaser.Scene {
       },
 
       'food-data': (data) => {
-        console.log(foodData.length, data.Data.length)
-        if (foodData.length !== data.Data.length) {
-          // foodGroup.destroy();
-          // foodData = [];
-          foodData = data.Data
-          // flag = true;
-          foodData.forEach(e => {
-            getFood(this, 'food', 1, e.Radius, { min: -e.X, max: e.X }, { min: -e.Y, max: e.Y })
-          })
-        } else {
-          // foodData = [];
-          flag = true
-        }
+        // console.log(foodData.length, data.Data.length)
+        // if (foodData.length !== data.Data.length) {
+        //   // foodGroup.destroy();
+        //   // foodData = [];
+        //   foodData = data.Data
+        //   // flag = true;
+        //   foodData.forEach(e => {
+        //     getFood(this, 'food', 1, e.Radius, { min: -e.X, max: e.X }, { min: -e.Y, max: e.Y })
+        //   })
+        // } else {
+        //   // foodData = [];
+        //   flag = true
+        // }
       }
     }
 

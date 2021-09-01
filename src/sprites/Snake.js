@@ -64,18 +64,18 @@ export default class extends Phaser.GameObjects.Sprite {
     this.initSections(9)
     // init eyes
     // this.eyes = new EyePair(this.scene, this.head, this.scale);
-    this.tweens = []
+    // this.tweens = []
 
-    this.sections.forEach((sec) => {
-      const tween = this.scene.tweens.add({
-        targets: sec,
-        x,
-        y,
-        ease: 'Linear',
-        duration: 100
-      })
-      this.tweens.push(tween)
-    })
+    // this.sections.forEach((sec) => {
+    //   const tween = this.scene.tweens.add({
+    //     targets: sec,
+    //     x,
+    //     y,
+    //     ease: 'Linear',
+    //     duration: 100
+    //   })
+    //   this.tweens.push(tween)
+    // })
 
     this.onDestroyedCallbacks = []
     this.onDestroyedContexts = []
