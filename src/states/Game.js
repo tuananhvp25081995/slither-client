@@ -23,6 +23,7 @@ let gameStart = 0
 let firstServerTimestamp = 0
 let isStart = false
 let isInitSnake = false
+let meTest = {}
 
 export default class Game extends Phaser.Scene {
   preload () {}
@@ -59,6 +60,8 @@ export default class Game extends Phaser.Scene {
         const meUpdate = data.Data.filter(player => {
           return player.id === name
         })[0]
+        meTest = { ...meUpdate }
+        console.log('meUpdate', meUpdate)
         const othersUpdate = data.Data.filter(player => {
           return player.id !== name
         })
@@ -81,6 +84,12 @@ export default class Game extends Phaser.Scene {
     const gameHeight = this.game.config.height
     this.add.tileSprite(0, 0, gameWidth * 3, gameHeight * 3, 'background')
 
+    // Init Snake
+    this.game.snakes = []
+    snake = new Snake(this, 430, 230, 'circle')
+    this.game.playerSnake = snake
+    this.cameras.main.startFollow(snake.head)
+    isInitSnake = true
     this.cameras.main.width = gameWidth / 2
     this.cameras.main.height = gameHeight / 2
 
@@ -152,28 +161,26 @@ export default class Game extends Phaser.Scene {
 
   update (time, delta) {
     if (isUpdate) {
-      if (!isInitSnake) {
-        // Init Snake
-        this.game.snakes = []
-        snake = new Snake(this, 430, 230, 'circle')
-        this.game.playerSnake = snake
-        this.cameras.main.startFollow(snake.head)
-        isInitSnake = true
-      }
-      const { me } = getCurrentState()
-      console.log(getCurrentState())
-      this.slot.update()
+      if (isInitSnake) {
+        const { me } = getCurrentState()
+        this.slot.update()
+        for (let i = this.game.snakes.length - 1; i >= 0; i--) {
+          this.game.snakes[i].update(me)
+        }
 
-      pointerMove(this.input.activePointer.updateWorldPoint(this.cameras.main))
-      for (let i = this.game.snakes.length - 1; i >= 0; i--) {
-        this.game.snakes[i].update(me)
+        pointerMove(this.input.activePointer.updateWorldPoint(this.cameras.main))
+        if (Phaser.Math.Within(meTest.angleDelta, 0, TOLERANCE)) {
+          snake.head.rotation = meTest.rotation
+          snake.head.setAngularVelocity(0)
+        } else {
+          snake.head.setAngularVelocity(Math.sign(meTest.angleDelta) * ROTATION_SPEED_DEGREES)
+        }
       }
     }
   }
 }
 
 function pointerMove (pointer, camera) {
-
   if (socket.readyState === 1) {
     const event = {
       event: 'change_target',
@@ -184,18 +191,7 @@ function pointerMove (pointer, camera) {
     }
     socket.send(JSON.stringify(event))
   }
-
-  // if (Phaser.Math.Within(angleDelta, 0, TOLERANCE)) {
-  //   snake.head.rotation = angleToPointer
-  //   snake.head.setAngularVelocity(0)
-  // } else {
-  //   snake.head.setAngularVelocity(Math.sign(angleDelta) * ROTATION_SPEED_DEGREES)
-  // }
-  // console.log('event end', snake.head.rotation)
-
-  // console.log('velocity', snake.head.body.velocity)
 }
-
 
 function processGameUpdate (update) {
   if (!firstServerTimestamp) {
@@ -242,7 +238,6 @@ function getCurrentState () {
   } else {
     const baseUpdate = gameUpdates[base]
     const next = gameUpdates[base + 1]
-    console.log(baseUpdate, next)
     const ratio = (serverTime - baseUpdate.t) / (next.t - baseUpdate.t)
     return {
       me: interpolateObject(baseUpdate.me, next.me, ratio),
@@ -258,22 +253,20 @@ function interpolateObject (object1, object2, ratio) {
 
   const interpolated = {}
   Object.keys(object1).forEach(key => {
-    if (key === 'velocity') {
-      interpolated[key] = interpolateVelocity(object1[key], object2[key], ratio)
+    if (key === 'circleSnake') {
+      interpolated[key] = interpolateCircleSnake(object1[key], object2[key], ratio)
     } else {
       interpolated[key] = object1[key]
     }
-    console.log(key, interpolated)
   })
   return interpolated
 }
-function interpolateVelocity (object1, object2, ratio) {
-  const interpolated = {}
-  Object.keys(object1).forEach(key => {
-    interpolated[key] = object1[key] + (object2[key] - object1[key]) * ratio
+function interpolateCircleSnake (circleSnakes1, circleSnakes2, ratio) {
+  circleSnakes1.map((i, v) => {
+    return v + (circleSnakes2[i] - v) * ratio
   })
 
-  return interpolated
+  return circleSnakes1
 }
 
 function interpolateObjectArray (objects1, objects2, ratio) {
