@@ -3,7 +3,7 @@ import { throttle } from 'throttle-debounce'
 import Snake from '../sprites/Snake'
 import Slot from '../sprites/Slot'
 import Timer from '../sprites/Timer'
-import { getWs, getWs } from '../socket'
+import { getWs } from '../socket'
 import CircleBorder from '../sprites/CircleBorder'
 import Leaderboard from '../sprites/Leaderboard'
 
