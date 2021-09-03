@@ -25,6 +25,5 @@ export default class {
 
   spriteHitHealth (health) {
     this.healthGroup.killAndHide(health)
-    console.log(health)
   }
 }

@@ -18,11 +18,6 @@ export default class extends Phaser.GameObjects.Graphics {
     const config = {
       delay: delay,
       callback: () => {
-        console.log('Initiate Resizing')
-        console.log(
-          'Resizing in Progress... Will take about 25 seconds'
-        )
-
         const interval = setInterval(() => {
           if (this.scale >= scale) {
             this.scale -= 0.001
@@ -30,7 +25,6 @@ export default class extends Phaser.GameObjects.Graphics {
             this.y += this.body.halfHeight * 0.001
           } else {
             clearInterval(interval)
-            console.log('Finish Resizing')
           }
         }, 100)
       }

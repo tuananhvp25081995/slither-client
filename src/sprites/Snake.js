@@ -39,7 +39,7 @@ export default class extends Phaser.GameObjects.Sprite {
     // this.shadow = new Shadow(this.scene, this.sections, this.scale);
 
     // this.sectionGroup = this.scene.physics.add.group()
-    this.sectionGroup = this.scene.add.container(x, y)
+    this.sectionGroup = this.scene.add.container(0, 0)
     // add nick name
     nickName = localStorage.getItem('username')
     this.textPosition = this.scene.add.text(x, y, nickName, {

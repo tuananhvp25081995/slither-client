@@ -2,7 +2,7 @@ import Phaser from 'phaser'
 import Snake from '../sprites/Snake'
 import Slot from '../sprites/Slot'
 import Timer from '../sprites/Timer'
-
+import { getWs } from '../socket'
 import CircleBorder from '../sprites/CircleBorder'
 import Leaderboard from '../sprites/Leaderboard'
 let snake
@@ -10,6 +10,8 @@ let Circle
 let healthGroup
 let foodGroup
 let socket
+let foodData = []
+let flag = false
 const SPEED = 200
 const ROTATION_SPEED = 1.5 * Math.PI
 const ROTATION_SPEED_DEGREES = Phaser.Math.RadToDeg(ROTATION_SPEED)
@@ -18,30 +20,15 @@ const TOLERANCE = 0.02 * ROTATION_SPEED
 const velocityFromRotation = Phaser.Physics.Arcade.ArcadePhysics.prototype.velocityFromRotation
 
 export default class Game extends Phaser.Scene {
-  preload () {}
+  preload () { }
 
   create () {
-    const name = localStorage.getItem('username')
-    socket = new WebSocket(`ws://66.42.51.96/ws/${name}`)
-    const getSocket = () => {
-      socket.onopen = () => {
-        heartbeat()
-      }
-      socket.onclose = () => {
-        getSocket()
-      }
-      socket.onerror = (error) => {
-        console.log('Socket Error: ', error)
-      }
-      socket.onmessage = (e) => {
-        const data = JSON.parse(e.data)
-        webSocketAction[data.Action](data.Data)
-      }
-    }
-    const heartbeat = () => {
-      if (!socket) return
-      socket.send('Ping')
-      setTimeout(heartbeat, 5000)
+    socket = getWs()
+
+    socket.onmessage = (e) => {
+      const data = JSON.parse(e.data)
+      // console.log(data)
+      webSocketAction[data.Action](data.Data)
     }
     const webSocketAction = {
       'snake-data': (data) => {
@@ -49,12 +36,22 @@ export default class Game extends Phaser.Scene {
       },
 
       'food-data': (data) => {
-        // console.log(data)
+
+        if (foodData.length !== data.length) {
+          // foodGroup.destroy();
+          // foodData = [];
+          foodData = data
+          // flag = true;
+          foodData.forEach(e => {
+            getFood(this, 'food', 1, e.Radius, { min: -e.X, max: e.X }, { min: -e.Y, max: e.Y })
+          })
+        } else {
+          // foodData = [];
+          flag = true
+        }
       }
     }
 
-    console.log(socket)
-    getSocket()
     // Always add map first. Everything else is added after map.
     const gameWidth = this.game.config.width
     const gameHeight = this.game.config.height
@@ -76,12 +73,13 @@ export default class Game extends Phaser.Scene {
     //  When the player sprite his the health packs, call this function ...
     // this.physics.add.overlap(snake.head, plusRunes.healthGroup, plusRunes.spriteHitHealth());
     //
-    foodGroup = this.physics.add.staticGroup({
-      key: 'food',
-      frameQuantity: 100,
-      immovable: true
-      // setScale: { x: 0.1, y: 0.1 }
-    })
+
+    // if (foodData) {
+    //   foodData.forEach(e => {
+    //     console.log(e)
+    //     // getFood(this, 'food', 1, foodData.Radius, { min: -foodData.X, max: foodData.X }, { min: -foodData.Y, max: foodData.Y });
+    //   });
+    // }
     healthGroup = this.physics.add.staticGroup({
       key: 'plus',
       frameQuantity: 10,
@@ -90,13 +88,7 @@ export default class Game extends Phaser.Scene {
     })
 
     const children = healthGroup.getChildren()
-    const childrenFood = foodGroup.getChildren()
-    for (let i = 0; i < children.length; i++) {
-      const x = Phaser.Math.Between(200, 550)
-      const y = Phaser.Math.Between(200, 850)
 
-      childrenFood[i].setPosition(x, y)
-    }
     for (let i = 0; i < children.length; i++) {
       const x = Phaser.Math.Between(1000, 1750)
       const y = Phaser.Math.Between(1000, 1550)
@@ -105,9 +97,8 @@ export default class Game extends Phaser.Scene {
     }
 
     healthGroup.refresh()
-    foodGroup.refresh()
+
     //  When the player sprite hits the foods, call this function ...
-    this.physics.add.overlap(snake.head, foodGroup, this.spriteHitFood)
     this.physics.add.overlap(snake.head, healthGroup, this.spriteHitHealth)
     
 
@@ -133,17 +124,12 @@ export default class Game extends Phaser.Scene {
     healthGroup.killAndHide(health)
   }
 
-  spriteHitFood (sprite, health) {
-    foodGroup.killAndHide(health)
-  }
-
   update (delta) {
     this.slot.update()
     
     for (let i = this.game.snakes.length - 1; i >= 0; i--) {
       this.game.snakes[i].update()
     }
-
     pointerMove(this.input.activePointer.updateWorldPoint(this.cameras.main))
     velocityFromRotation(snake.head.rotation, SPEED, snake.head.body.velocity)
     snake.head.body.debugBodyColor = (snake.head.body.angularVelocity === 0) ? 0xff0000 : 0xffff00
@@ -163,6 +149,34 @@ export default class Game extends Phaser.Scene {
       pointerMove(this.input.activePointer.updateWorldPoint(this.cameras.main))
     }
   }
+}
+
+function getFood (game, type, quantity, scale, positionX, positionY) {
+  foodGroup = game.physics.add.staticGroup({
+    key: type,
+    frameQuantity: quantity,
+    immovable: true,
+    setScale: { x: scale / 3, y: scale / 3 }
+  })
+  if (flag) {
+    foodGroup.destroy()
+  } else {
+    const childrenFood = foodGroup.getChildren()
+    for (let i = 0; i < childrenFood.length; i++) {
+      const x = Phaser.Math.Between(positionX.min, positionX.max)
+      const y = Phaser.Math.Between(positionY.min, positionY.max)
+
+      childrenFood[i].setPosition(x, y)
+    }
+    foodGroup.refresh()
+    game.physics.add.overlap(snake.head, foodGroup, spriteHitFood)
+  }
+}
+// destroy food
+function spriteHitFood (sprite, health) {
+  console.log('aaa')
+  // foodGroup.killAndHide(health)
+  // foodGroup.destroy();
 }
 function pointerMove (pointer, camera) {
   // if (!pointer.manager.isOver) return;
