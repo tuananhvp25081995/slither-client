@@ -36,7 +36,7 @@ export default class Game extends Phaser.Scene {
       },
 
       'food-data': (data) => {
-        console.log(foodData.length, data.length)
+
         if (foodData.length !== data.length) {
           // foodGroup.destroy();
           // foodData = [];
@@ -64,7 +64,11 @@ export default class Game extends Phaser.Scene {
     this.cameras.main.width = gameWidth / 2
     this.cameras.main.height = gameHeight / 2
     this.cameras.main.startFollow(snake.head)
-
+    // minimap
+    const minimapSize = gameWidth / 20
+    this.minimap = this.cameras.add(this.cameras.main.width - minimapSize, this.cameras.main.height - minimapSize, minimapSize, minimapSize).setZoom(0.016)
+    this.minimap.setBackgroundColor(0xffffff)
+    this.minimap.ignore(snake.sections)
     // plusRunes = new PowerRune(this, snake.head, 'plus', 10, { x: -100, y: -100 }, { x: 750, y: 550 });
     //  When the player sprite his the health packs, call this function ...
     // this.physics.add.overlap(snake.head, plusRunes.healthGroup, plusRunes.spriteHitHealth());
@@ -96,10 +100,7 @@ export default class Game extends Phaser.Scene {
 
     //  When the player sprite hits the foods, call this function ...
     this.physics.add.overlap(snake.head, healthGroup, this.spriteHitHealth)
-    // minimap
-    const minimapSize = gameWidth / 20
-    this.minimap = this.cameras.add(this.cameras.main.width - minimapSize, this.cameras.main.height - minimapSize, minimapSize, minimapSize).setZoom(0.016)
-    this.minimap.setBackgroundColor(0xffffff)
+    
 
     // create Circle
     // Circle = CircleBorder.createCircle(this, gameWidth / 2)
@@ -115,6 +116,8 @@ export default class Game extends Phaser.Scene {
     this.timer = new Timer(this)
 
     this.leaderboard = new Leaderboard(this)
+    
+    
   }
 
   spriteHitHealth (sprite, health) {
@@ -123,6 +126,7 @@ export default class Game extends Phaser.Scene {
 
   update (delta) {
     this.slot.update()
+    
     for (let i = this.game.snakes.length - 1; i >= 0; i--) {
       this.game.snakes[i].update()
     }
