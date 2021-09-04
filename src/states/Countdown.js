@@ -14,7 +14,9 @@ export default class Countdown extends Phaser.Scene {
     socket = initWs()
     socket.onmessage = (e) => {
       const data = JSON.parse(e.data)
-      webSocketAction[data.Action](data.Data)
+      if (data.Action) {
+        webSocketAction[data.Action](data.Data)
+      }
     }
 
     const webSocketAction = {

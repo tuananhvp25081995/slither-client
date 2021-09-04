@@ -64,18 +64,18 @@ export default class extends Phaser.GameObjects.Sprite {
     this.initSections(9)
     // init eyes
     // this.eyes = new EyePair(this.scene, this.head, this.scale);
-    // this.tweens = []
+    this.tweens = []
 
-    // this.sections.forEach((sec) => {
-    //   const tween = this.scene.tweens.add({
-    //     targets: sec,
-    //     x,
-    //     y,
-    //     ease: 'Linear',
-    //     duration: 100
-    //   })
-    //   this.tweens.push(tween)
-    // })
+    this.sections.forEach((sec) => {
+      const tween = this.scene.tweens.add({
+        targets: sec,
+        x,
+        y,
+        ease: 'Linear',
+        duration: 1000
+      })
+      this.tweens.push(tween)
+    })
 
     this.onDestroyedCallbacks = []
     this.onDestroyedContexts = []
@@ -149,20 +149,20 @@ export default class extends Phaser.GameObjects.Sprite {
   }
 
   update (snakeDataUpdate) {
-    if (!snakeDataUpdate) {
+    if (!snakeDataUpdate || !Array.isArray(snakeDataUpdate.circleSnake)) {
       return
     }
     const snakeSections = [...snakeDataUpdate.circleSnake]
+    console.log('snakeSections', snakeSections)
     for (let i = 0; i < snakeSections.length; i++) {
-      this.sections[i].body.x = snakeSections[i].x
-      this.sections[i].body.y = snakeSections[i].y
-      // this.tweens[i].play()
-      // if (this.tweens[i].isPlaying() && snakeSections[i]) {
-      //   this.tweens[i].updateTo('x', snakeSections[i].x, true)
-      //   this.tweens[i].updateTo('y', snakeSections[i].x, true)
-      // } else {
-      //   console.log('Progress: ' + this.tweens[i].progress, snakeSections[i].x)
-      // }
+      // this.sections[i].body.x = snakeSections[i].x
+      // this.sections[i].body.y = snakeSections[i].y
+
+      this.tweens[i].play()
+      if (this.tweens[i].isPlaying() && snakeSections[i]) {
+        this.tweens[i].updateTo('x', snakeSections[i].x, true)
+        this.tweens[i].updateTo('y', snakeSections[i].y, true)
+      }
     }
   }
 

@@ -40,17 +40,19 @@ export default class Game extends Phaser.Scene {
     socket.onmessage = (e) => {
       const data = JSON.parse(e.data)
 
-      webSocketAction[data.action](data)
-      isStart = true
+      if (data.action) {
+        webSocketAction[data.action](data)
+        isStart = true
+      }
     }
     const webSocketAction = {
       'snake-data': (data) => {
-        console.log(data)
+        // console.log(data)
         const meUpdate = data.data.filter(player => {
           return player.id === name
         })[0]
         meTest = { ...meUpdate }
-        console.log('meUpdate', meUpdate)
+        // console.log('meUpdate', meUpdate)
         const othersUpdate = data.data.filter(player => {
           return player.id !== name
         })
@@ -88,10 +90,10 @@ export default class Game extends Phaser.Scene {
     this.game.snakes = []
     snake = new Snake(this, 430, 230, 'circle')
     this.game.playerSnake = snake
-    this.cameras.main.startFollow(snake.head)
     isInitSnake = true
     this.cameras.main.width = gameWidth / 2
     this.cameras.main.height = gameHeight / 2
+    this.cameras.main.startFollow(snake.head)
 
     // plusRunes = new PowerRune(this, snake.head, 'plus', 10, { x: -100, y: -100 }, { x: 750, y: 550 });
     //  When the player sprite his the health packs, call this function ...
@@ -153,21 +155,24 @@ export default class Game extends Phaser.Scene {
     if (isUpdate) {
       if (isInitSnake) {
         const { me } = getCurrentState()
+
         this.slot.update()
-        for (let i = this.game.snakes.length - 1; i >= 0; i--) {
-          this.game.snakes[i].update(me)
+        if (me) {
+          for (let i = this.game.snakes.length - 1; i >= 0; i--) {
+            this.game.snakes[i].update(me)
+          }
         }
 
         pointerMove(this.input.activePointer.updateWorldPoint(this.cameras.main))
-        if (Phaser.Math.Within(meTest.angleDelta, 0, TOLERANCE)) {
-          snake.head.rotation = meTest.rotation
-          snake.head.setAngularVelocity(0)
-        } else {
-          snake.head.setAngularVelocity(Math.sign(meTest.angleDelta) * ROTATION_SPEED_DEGREES)
-        }
+        // if (Phaser.Math.Within(meTest.angleDelta, 0, TOLERANCE)) {
+        //   snake.head.rotation = meTest.rotation
+        //   snake.head.setAngularVelocity(0)
+        // } else {
+        //   snake.head.setAngularVelocity(Math.sign(meTest.angleDelta) * ROTATION_SPEED_DEGREES)
+        // }
+        //   }
       }
     }
-    // }
   }
 }
 
