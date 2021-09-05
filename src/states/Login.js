@@ -1,25 +1,31 @@
 import Phaser from 'phaser'
+import { getWS } from '../socket'
+import { SOCKET_EVENT } from '../contants'
 
 export default class Login extends Phaser.Scene {
-  preload () { }
+  preload () {
+    this.socket = getWS()
+  }
 
   create () {
-    this.cameras.main.setBackgroundColor(0x161c22)
+    const self = this
+    self.cameras.main.setBackgroundColor(0x161c22)
 
     const x = window.innerWidth / 2
     const y = window.innerHeight / 2
 
     localStorage.setItem('username', '')
 
-    this.form = this.add.dom(x, y).createFromCache('loginform')
+    self.form = self.add.dom(x, y).createFromCache('loginform')
 
-    this.form.addListener('click')
-    this.form.on('click', function (e) {
+    self.form.addListener('click')
+    self.form.on('click', function (e) {
       if (e.target.name === 'playBtn') {
         const inputText = this.getChildByName('usernameField').value
         if (inputText !== '') {
           localStorage.setItem('username', inputText)
-          this.scene.scene.start('countdown')
+          self.socket.emit(SOCKET_EVENT.GOTIT, JSON.stringify({ name: inputText }))
+          self.scene.start('countdown')
         }
       }
     })

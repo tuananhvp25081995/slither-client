@@ -1,99 +1,67 @@
 import Phaser from 'phaser'
-import { throttle } from 'throttle-debounce'
 import Snake from '../sprites/Snake'
 import Slot from '../sprites/Slot'
 import Timer from '../sprites/Timer'
-import { getWs } from '../socket'
+import { getWS } from '../socket'
 import CircleBorder from '../sprites/CircleBorder'
 import Leaderboard from '../sprites/Leaderboard'
+import { SOCKET_EVENT } from '../contants'
 
 let snake
 let Circle
 let healthGroup
 let foodGroup
-let socket
 const foodData = []
 const flag = false
-const SPEED = 150
-const ROTATION_SPEED = 1.5 * Math.PI
-const ROTATION_SPEED_DEGREES = Phaser.Math.RadToDeg(ROTATION_SPEED)
-const TOLERANCE = 0.02 * ROTATION_SPEED
-let isUpdate = false
 
 const RENDER_DELAY = 20
 const gameUpdates = []
 let gameStart = 0
 let firstServerTimestamp = 0
-let isStart = false
 let isInitSnake = false
 let meTest = {}
 
 export default class Game extends Phaser.Scene {
-  preload () { }
+  preload () {
+    this.socket = getWS()
+  }
 
   create () {
-    socket = getWs()
     gameStart = 0
     firstServerTimestamp = 0
-    const name = localStorage.getItem('username')
-
-    socket.onmessage = (e) => {
-      const data = JSON.parse(e.data)
-
-      if (data.action) {
-        webSocketAction[data.action](data)
-        isStart = true
-      }
-    }
-    const webSocketAction = {
-      'snake-data': (data) => {
-        // console.log(data)
-        const meUpdate = data.data.filter(player => {
-          return player.id === name
-        })[0]
-        meTest = { ...meUpdate }
-        // console.log('meUpdate', meUpdate)
-        const othersUpdate = data.data.filter(player => {
-          return player.id !== name
-        })
-        processGameUpdate({
-          t: data.t,
-          me: { ...meUpdate },
-          others: [...othersUpdate]
-        })
-        isUpdate = true
-      },
-
-      'food-data': (data) => {
-        // console.log(foodData.length, data.Data.length)
-        // if (foodData.length !== data.Data.length) {
-        //   // foodGroup.destroy();
-        //   // foodData = [];
-        //   foodData = data.Data
-        //   // flag = true;
-        //   foodData.forEach(e => {
-        //     getFood(this, 'food', 1, e.Radius, { min: -e.X, max: e.X }, { min: -e.Y, max: e.Y })
-        //   })
-        // } else {
-        //   // foodData = [];
-        //   flag = true
-        // }
-      }
-    }
+    // const name = localStorage.getItem('username')
 
     // Always add map first. Everything else is added after map.
     const gameWidth = this.game.config.width
     const gameHeight = this.game.config.height
     this.add.tileSprite(0, 0, gameWidth * 3, gameHeight * 3, 'background')
 
-    // Init Snake
-    this.game.snakes = []
-    snake = new Snake(this, 430, 230, 'circle')
-    this.game.playerSnake = snake
-    isInitSnake = true
     this.cameras.main.width = gameWidth / 2
     this.cameras.main.height = gameHeight / 2
-    this.cameras.main.startFollow(snake.head)
+
+    this.game.snakes = []
+
+    this.socket.on(SOCKET_EVENT.SERVER_TELL_PLAYER_TO_MOVE, (e) => {
+      const playerData = JSON.parse(e)
+      meTest = playerData
+      console.log(playerData)
+      if (!isInitSnake) {
+        // Init Snake
+        const circleSnake = [...playerData.circleSnake]
+        const head = circleSnake.shift()
+
+        const snake = new Snake(this, head.x, head.y, 'circle')
+        snake.initSections(circleSnake)
+        this.game.playerSnake = snake
+        isInitSnake = true
+        this.cameras.main.startFollow(snake.head)
+      }
+    })
+
+    this.socket.on(SOCKET_EVENT.SERVER_UPDATE_ALL_PLAYERS, (e) => {
+      const data = JSON.parse(e)
+      // console.log(data)
+    })
 
     // plusRunes = new PowerRune(this, snake.head, 'plus', 10, { x: -100, y: -100 }, { x: 750, y: 550 });
     //  When the player sprite his the health packs, call this function ...
@@ -125,7 +93,7 @@ export default class Game extends Phaser.Scene {
     healthGroup.refresh()
 
     //  When the player sprite hits the foods, call this function ...
-    this.physics.add.overlap(snake.head, healthGroup, this.spriteHitHealth)
+    // this.physics.add.overlap(snake.head, healthGroup, this.spriteHitHealth)
     // minimap
     const minimapSize = gameWidth / 20
     this.minimap = this.cameras.add(this.cameras.main.width - minimapSize, this.cameras.main.height - minimapSize, minimapSize, minimapSize).setZoom(0.016)
@@ -152,26 +120,20 @@ export default class Game extends Phaser.Scene {
   }
 
   update (time, delta) {
-    if (isUpdate) {
-      if (isInitSnake) {
-        const { me } = getCurrentState()
+    if (isInitSnake) {
+      // const { me } = getCurrentState()
 
-        this.slot.update()
-        if (me) {
-          for (let i = this.game.snakes.length - 1; i >= 0; i--) {
-            this.game.snakes[i].update(me)
-          }
-        }
-
-        pointerMove(this.input.activePointer.updateWorldPoint(this.cameras.main))
-        // if (Phaser.Math.Within(meTest.angleDelta, 0, TOLERANCE)) {
-        //   snake.head.rotation = meTest.rotation
-        //   snake.head.setAngularVelocity(0)
-        // } else {
-        //   snake.head.setAngularVelocity(Math.sign(meTest.angleDelta) * ROTATION_SPEED_DEGREES)
-        // }
-        //   }
+      this.slot.update()
+      for (let i = this.game.snakes.length - 1; i >= 0; i--) {
+        this.game.snakes[i].update(meTest)
       }
+      const pointer = this.input.activePointer.updateWorldPoint(this.cameras.main)
+
+      const event = {
+        x: pointer.worldX,
+        y: pointer.worldY
+      }
+      this.socket.emit(SOCKET_EVENT.PLAYERSENDTARGET, JSON.stringify(event))
     }
   }
 }
@@ -202,18 +164,6 @@ function spriteHitFood (sprite, health) {
   console.log('aaa')
   // foodGroup.killAndHide(health)
   // foodGroup.destroy();
-}
-function pointerMove (pointer, camera) {
-  if (socket.readyState === 1) {
-    const event = {
-      event: 'change_target',
-      data: {
-        X: pointer.worldX,
-        Y: pointer.worldY
-      }
-    }
-    socket.send(JSON.stringify(event))
-  }
 }
 
 function processGameUpdate (update) {

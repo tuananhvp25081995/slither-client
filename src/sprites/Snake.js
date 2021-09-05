@@ -28,6 +28,7 @@ export default class extends Phaser.GameObjects.Sprite {
     // this.collisionGroup = this.scene.physics.p2.createCollisionGroup()
     this.sections = []
     this.headPath = []
+    this.tweens = []
     this.food = []
     this.preferredDistance = 17 * this.scale
     this.queuedSections = 0
@@ -60,22 +61,20 @@ export default class extends Phaser.GameObjects.Sprite {
       this.head.body.y
     )
 
-    // add 30 sections behind the head
-    this.initSections(9)
     // init eyes
     // this.eyes = new EyePair(this.scene, this.head, this.scale);
-    this.tweens = []
 
-    this.sections.forEach((sec) => {
-      const tween = this.scene.tweens.add({
-        targets: sec,
-        x,
-        y,
-        ease: 'Linear',
-        duration: 1000
-      })
-      this.tweens.push(tween)
-    })
+
+    // this.sections.forEach((sec) => {
+    //   const tween = this.scene.tweens.add({
+    //     targets: sec,
+    //     x,
+    //     y,
+    //     ease: 'Linear',
+    //     duration: 1000
+    //   })
+    //   this.tweens.push(tween)
+    // })
 
     this.onDestroyedCallbacks = []
     this.onDestroyedContexts = []
@@ -130,18 +129,24 @@ export default class extends Phaser.GameObjects.Sprite {
     // sec.body.clearShapes();
     sec.body.setCircle(sec.width * 0.5)
 
+    const tween = this.scene.tweens.add({
+      targets: this.scene,
+      x: sec.x,
+      y: sec.y,
+      ease: 'Linear',
+      duration: 1000
+    })
+    this.tweens.push(tween)
     // add shadow
     // this.shadow.add(x, y);
     return sec
   }
 
-  initSections (num) {
-    for (let i = 1; i <= num; i++) {
-      const x = 400
-      const y = 200 + i * this.preferredDistance
-      this.addSectionAtPosition(x, y)
-      this.headPath.push(new Phaser.Geom.Point(x, y))
-    }
+  initSections (snakeSections = []) {
+    snakeSections.forEach((section) => {
+      this.addSectionAtPosition(section.x, section.y)
+      this.headPath.push(new Phaser.Geom.Point(section.x, section.y))
+    })
   }
 
   addSectionsAfterLast (amount) {
@@ -153,16 +158,15 @@ export default class extends Phaser.GameObjects.Sprite {
       return
     }
     const snakeSections = [...snakeDataUpdate.circleSnake]
-    console.log('snakeSections', snakeSections)
     for (let i = 0; i < snakeSections.length; i++) {
-      // this.sections[i].body.x = snakeSections[i].x
-      // this.sections[i].body.y = snakeSections[i].y
+      this.sections[i].body.x = snakeSections[i].x
+      this.sections[i].body.y = snakeSections[i].y
 
-      this.tweens[i].play()
-      if (this.tweens[i].isPlaying() && snakeSections[i]) {
-        this.tweens[i].updateTo('x', snakeSections[i].x, true)
-        this.tweens[i].updateTo('y', snakeSections[i].y, true)
-      }
+      // this.tweens[i].play()
+      // if (this.tweens[i].isPlaying() && snakeSections[i]) {
+      //   this.tweens[i].updateTo('x', snakeSections[i].x, true)
+      //   this.tweens[i].updateTo('y', snakeSections[i].y, true)
+      // }
     }
   }
 
