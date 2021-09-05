@@ -113,6 +113,8 @@ export default class Game extends Phaser.Scene {
     this.timer = new Timer(this)
 
     this.leaderboard = new Leaderboard(this)
+    
+    
   }
 
   spriteHitHealth (sprite, health) {
