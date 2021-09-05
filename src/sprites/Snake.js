@@ -28,6 +28,7 @@ export default class extends Phaser.GameObjects.Sprite {
     // this.collisionGroup = this.scene.physics.p2.createCollisionGroup()
     this.sections = []
     this.headPath = []
+    this.tweens = []
     this.food = []
     this.preferredDistance = 17 * this.scale
     this.queuedSections = 0
@@ -63,11 +64,20 @@ export default class extends Phaser.GameObjects.Sprite {
       this.head.body.y
     )
 
-    // add 30 sections behind the head
-    this.initSections(40)
-
     // init eyes
     // this.eyes = new EyePair(this.scene, this.head, this.scale);
+
+
+    // this.sections.forEach((sec) => {
+    //   const tween = this.scene.tweens.add({
+    //     targets: sec,
+    //     x,
+    //     y,
+    //     ease: 'Linear',
+    //     duration: 1000
+    //   })
+    //   this.tweens.push(tween)
+    // })
 
     this.onDestroyedCallbacks = []
     this.onDestroyedContexts = []
@@ -84,7 +94,6 @@ export default class extends Phaser.GameObjects.Sprite {
     this.edge.alpha = 0
     // this.scene.physics.p2.enable(this.edge, this.debug)
     this.edge.body.setCircle(this.edgeOffset)
-
     // constrain edge to the front of the head
     // this.edgeLock = this.scene.physics.p2.createLockConstraint(
     //     this.edge.body,
@@ -113,11 +122,6 @@ export default class extends Phaser.GameObjects.Sprite {
     // init new section
     const sec = this.scene.physics.add.sprite(x, y, this.spriteKey)
 
-    // this.scene.physics.p2.enable(sec, this.debug)
-    // sec.body.setCollisionGroup(this.collisionGroup);
-    // sec.body.collides([]);
-    // sec.body.kinematic = true;
-
     this.snakeLength++
     this.sectionGroup.add(sec)
     this.sectionGroup.sendToBack(sec)
@@ -128,146 +132,44 @@ export default class extends Phaser.GameObjects.Sprite {
     // sec.body.clearShapes();
     sec.body.setCircle(sec.width * 0.5)
 
+    const tween = this.scene.tweens.add({
+      targets: this.scene,
+      x: sec.x,
+      y: sec.y,
+      ease: 'Linear',
+      duration: 1000
+    })
+    this.tweens.push(tween)
     // add shadow
     // this.shadow.add(x, y);
     return sec
   }
 
-  initSections (num) {
-    for (let i = 1; i <= num; i++) {
-      const x = this.head.body.x
-      const y = this.head.body.y + i * this.preferredDistance
-      this.addSectionAtPosition(x, y)
-
-      this.headPath.push(new Phaser.Geom.Point(x, y))
-    }
+  initSections (snakeSections = []) {
+    snakeSections.forEach((section) => {
+      this.addSectionAtPosition(section.x, section.y)
+      this.headPath.push(new Phaser.Geom.Point(section.x, section.y))
+    })
   }
 
   addSectionsAfterLast (amount) {
     this.queuedSections += amount
   }
 
-  update () {
-    // const angle = Phaser.Math.Angle.Between(
-    //   this.head.x,
-    //   this.head.y,
-    //   this.scene.input.mousePointer.x,
-    //   this.scene.input.mousePointer.y
-    // )
-    // this.head.setRotation(angle + Math.PI / 2)
-    // if (this.scene.input.mousePointer) {
-    //   // this.physics.moveToObject(this, this.scene.input, 240);
-    //   this.head.body.setVelocity(
-    //     this.scene.input.mousePointer.x - this.head.x,
-    //     this.scene.input.mousePointer.y - this.head.y
-    //   )
-    //   // this.physics.arcade.moveToPointer(snake, 100)
-    //   // console.log(this.scene.input.mousePointer.x, this.scene.input.mousePointer.y)
-    //   // console.log(snake.x, snake.y)
-    // }
-    // const speed = this.speed;
-    // this.head.body.moveForward(speed);
-    this.textPosition.setPosition(this.head.body.x, this.head.body.y - 16)
-    const point = this.headPath.pop()
-    point.setTo(this.head.body.x, this.head.body.y)
-    this.headPath.unshift(point)
-    // place each section of the snake on the path of the snake head
-    // certain distance from the section before it
-    let index = 0
-    let lastIndex = null
-    this.dotSnake.setPosition(this.head.x, this.head.y)
-    for (let i = 0; i < this.snakeLength; i++) {
-      this.sections[i].body.x = this.headPath[index].x
-      this.sections[i].body.y = this.headPath[index].y
-
-      // hide sections if they are at same pos
-      if (lastIndex && index === lastIndex) {
-        this.sections[i].alpha = 0
-      } else {
-        this.sections[i].alpha = 1
-      }
-
-      lastIndex = index
-      // this finds the index in the head path array that the next point
-      // should be at
-      index = this.findNextPointIndex(index)
+  update (snakeDataUpdate) {
+    if (!snakeDataUpdate || !Array.isArray(snakeDataUpdate.circleSnake)) {
+      return
     }
+    const snakeSections = [...snakeDataUpdate.circleSnake]
+    for (let i = 0; i < snakeSections.length; i++) {
+      this.sections[i].body.x = snakeSections[i].x
+      this.sections[i].body.y = snakeSections[i].y
 
-    // continuously adjust the size of the head path
-    if (index >= this.headPath.length - 1) {
-      const lastPos = this.headPath[this.headPath.length - 1]
-      this.headPath.push(new Phaser.Geom.Point(lastPos.x, lastPos.y))
-    } else {
-      this.headPath.pop()
-    }
-
-    // this calls onCycleComplete every time a cycle is completed.
-
-    let i = 0
-    let found = false
-    while (
-      this.headPath[i].x !== this.sections[1].body.x &&
-      this.headPath[i].y !== this.sections[1].body.y
-    ) {
-      if (
-        this.headPath[i].x === this.lastHeadPosition.x &&
-        this.headPath[i].y === this.lastHeadPosition.y
-      ) {
-        found = true
-        break
-      }
-      i++
-    }
-    if (!found) {
-      this.lastHeadPosition = new Phaser.Geom.Point(
-        this.head.body.x,
-        this.head.body.y
-      )
-      this.onCycleComplete()
-    }
-
-    // update the eyes
-    // this.eyes.update();
-
-    // update shadow
-    // this.shadow.update();
-  }
-
-  findNextPointIndex (currentIndex) {
-    // const pt = this.headPath[currentIndex]
-    // we are trying to find a point at approximately this distance away
-    // from the point before it, where the distance is the total length of
-    // all the lines connecting the two points
-    const prefDist = this.preferredDistance
-    let len = 0
-    let dif = len - prefDist
-    let i = currentIndex
-    let prevDif = null
-    // this loop sums the distances between points on the path of the head
-    // starting from the given index of the function and continues until
-    // this sum nears the preferred distance between two snake sections
-    while (i + 1 < this.headPath.length && (dif === null || dif < 0)) {
-      // get distance between next two points
-      const dist = Util.distanceFormula(
-        this.headPath[i].x,
-        this.headPath[i].y,
-        this.headPath[i + 1].x,
-        this.headPath[i + 1].y
-      )
-      len += dist
-      prevDif = dif
-      // we are trying to get the difference between the current sum and
-      // the preferred distance close to zero
-      dif = len - prefDist
-      i++
-    }
-
-    // choose the index that makes the difference closer to zero
-    // once the loop is complete
-    if (prevDif === null || Math.abs(prevDif) > Math.abs(dif)) {
-      return i
-    } else {
-      return i - 1
+      // this.tweens[i].play()
+      // if (this.tweens[i].isPlaying() && snakeSections[i]) {
+      //   this.tweens[i].updateTo('x', snakeSections[i].x, true)
+      //   this.tweens[i].updateTo('y', snakeSections[i].y, true)
+      // }
     }
   }
 

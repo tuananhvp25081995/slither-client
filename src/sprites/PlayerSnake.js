@@ -22,6 +22,7 @@ export default class extends Snake {
     // through in order to face the mouse
     // var mousePosX = this.game.input.activePointer.worldX;
     // var mousePosY = this.game.input.activePointer.worldY;
+    console.log('ssss');
     const mousePosX = this.mouseX
     const mousePosY = this.mouseY
     const headX = this.head.body.x

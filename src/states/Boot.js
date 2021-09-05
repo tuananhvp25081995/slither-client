@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import { initWs } from '../socket'
 export default class Boot extends Phaser.Scene {
   preload () {
     this.load.image('background', 'assets/images/background.jpg')
@@ -15,6 +16,7 @@ export default class Boot extends Phaser.Scene {
     this.load.image('skill4', 'assets/images/skill4.png')
     this.load.html('leaderboard', 'assets/html/leaderboard.html')
     this.load.html('loginform', 'assets/html/login.html')
+    initWs('match')
   }
 
   create () {

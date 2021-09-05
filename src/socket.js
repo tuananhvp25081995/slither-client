@@ -1,35 +1,36 @@
+import io from 'socket.io-client'
 let socket
+const debug = function (args) {
+  if (console && console.log) {
+    console.log(args)
+  }
+}
+export const initWs = (nameSpace = '') => {
+  socket = io(`ws://127.0.0.1:8080/${nameSpace}`, { transports: ['polling'] })
 
-export const initWs = (mesg) => {
-  const name = localStorage.getItem('username')
-  socket = new WebSocket(`ws://66.42.51.96/ws/${name}`)
+  socket.on('connect', () => {
+    debug('Connected')
+  })
+  // Handle ping.
+  socket.on('pongcheck', () => {
+    const latency = Date.now() - global.startPingTime
+    debug('Latency: ' + latency + 'ms')
+    window.chat.addSystemLine('Ping: ' + latency + 'ms')
+  })
+
+  // Handle error.
+  socket.on('connect_failed', () => {
+    socket.close()
+    debug('Socket connecting failed')
+  })
+
+  socket.on('disconnect', () => {
+    socket.close()
+    debug('Socket disconnected')
+  })
   return socket
 }
 
-export const getWs = () => {
+export const getWS = () => {
   return socket
 }
-
-// export const getSocket = () => {
-//   socket.onopen = () => {
-//     heartbeat()
-//   }
-//   socket.onclose = () => {
-//     getSocket()
-//   }
-//   socket.onerror = (error) => {
-//     console.log('Socket Error: ', error)
-//   }
-//   socket.onmessage = (e) => {
-//     const data = JSON.parse(e.data)
-//     webSocketAction[data.action](data)
-//   }
-
-//   const heartbeat = () => {
-//     if (!socket) return
-//     socket.send('Ping')
-//     setTimeout(heartbeat, 5000)
-//   }
-// }
-// const webSocketAction = {
-// 'data-slith
