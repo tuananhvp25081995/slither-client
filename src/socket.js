@@ -1,36 +1,38 @@
-import io from 'socket.io-client'
-let socket
+import io from 'socket.io-client';
+let socket;
 const debug = function (args) {
   if (console && console.log) {
-    console.log(args)
+    console.log(args);
   }
-}
+};
 export const initWs = (nameSpace = '') => {
-  socket = io(`ws://127.0.0.1:8080/${nameSpace}`, { transports: ['polling'] })
+  socket = io(`ws://127.0.0.1:8080/${nameSpace}`, {
+    transports: ['polling']
+  });
 
   socket.on('connect', () => {
-    debug('Connected')
-  })
+    debug('Connected');
+  });
   // Handle ping.
   socket.on('pongcheck', () => {
-    const latency = Date.now() - global.startPingTime
-    debug('Latency: ' + latency + 'ms')
-    window.chat.addSystemLine('Ping: ' + latency + 'ms')
-  })
+    const latency = Date.now() - global.startPingTime;
+    debug('Latency: ' + latency + 'ms');
+    window.chat.addSystemLine('Ping: ' + latency + 'ms');
+  });
 
   // Handle error.
   socket.on('connect_failed', () => {
-    socket.close()
-    debug('Socket connecting failed')
-  })
+    socket.close();
+    debug('Socket connecting failed');
+  });
 
   socket.on('disconnect', () => {
-    socket.close()
-    debug('Socket disconnected')
-  })
-  return socket
-}
+    socket.close();
+    debug('Socket disconnected');
+  });
+  return socket;
+};
 
 export const getWS = () => {
-  return socket
-}
+  return socket;
+};

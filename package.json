@@ -1,69 +1,41 @@
 {
-    "name": "snake-io-project",
-    "version": "1.0.0",
-    "description": "A Game Blockchain Project",
-    "author": "VietPham <vietpv94@gmail.com>",
-    "main": "index.js",
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/vietpv94/tulp-snake-io.git"
-    },
-    "license": "MIT",
-    "scripts": {
-        "dev": "webpack",
-        "deploy": "webpack --config webpack.production.config.js",
-        "cordova": "webpack --config webpack.cordova.config.js",
-        "test": "eslint './src/**/*.js'"
-    },
-    "devDependencies": {
-        "babel-core": "^6.26.3",
-        "babel-eslint": "^8.2.6",
-        "babel-loader": "^8.2.2",
-        "babel-polyfill": "^6.26.0",
-        "babel-preset-env": "^1.7.0",
-        "browser-sync": "^2.27.5",
-        "browser-sync-webpack-plugin": "^2.3.0",
-        "clean-webpack-plugin": "^3.0.0",
-        "copy-webpack-plugin": "^9.0.1",
-        "cordova": "^10.0.0",
-        "cross-env": "^7.0.3",
-        "eslint": "^7.32.0",
-        "eslint-config-standard": "^16.0.3",
-        "eslint-plugin-import": "^2.23.4",
-        "eslint-plugin-node": "^11.1.0",
-        "eslint-plugin-promise": "^5.1.0",
-        "eslint-plugin-standard": "^4.1.0",
-        "expose-loader": "^3.0.0",
-        "html-webpack-plugin": "^5.3.2",
-        "mini-css-extract-plugin": "^2.1.0",
-        "raw-loader": "^4.0.2",
-        "terser-webpack-plugin": "^5.1.4",
-        "webpack": "^5.48.0",
-        "webpack-cli": "^4.7.2",
-        "workbox-webpack-plugin": "^6.1.5"
-    },
-    "dependencies": {
-        "cordova-android": "^10.0.1",
-        "cordova-browser": "^6.0.0",
-        "cordova-ios": "^6.2.0",
-        "cordova-plugin-whitelist": "^1.3.5",
-        "firebase": "^8.8.1",
-        "idiom.js": "^1.0.1",
-        "phaser": "^3.55.2",
-        "phaser-ce": "^2.18.0",
-        "throttle-debounce": "^3.0.1",
-        "webfontloader": "^1.6.28",
-        "socket.io": "^2.2.0",
-        "socket.io-client": "^2.2.0"
-    },
-    "cordova": {
-        "platforms": [
-            "android",
-            "browser",
-            "ios"
-        ],
-        "plugins": {
-            "cordova-plugin-whitelist": {}
-        }
-    }
+  "name": "slither.finance",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "webpack --mode=development",
+    "deploy": "webpack  --mode=production --config webpack.production.config.js",
+    "test": "eslint ./src/**/**.js"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.3.4",
+    "@babel/polyfill": "^7.0.0",
+    "@babel/preset-env": "^7.3.4",
+    "babel-eslint": "^9.0.0",
+    "babel-loader": "^8.0.0",
+    "browser-sync": "^2.26.3",
+    "browser-sync-webpack-plugin": "^2.2.2",
+    "clean-webpack-plugin": "^0.1.19",
+    "copy-webpack-plugin": "^4.5.2",
+    "eslint": "^5.15.0",
+    "eslint-plugin-import": "^2.14.0",
+    "expose-loader": "^0.7.5",
+    "html-webpack-plugin": "^3.2.0",
+    "raw-loader": "^0.5.1",
+    "webpack": "^4.18.0",
+    "webpack-cli": "^3.1.0"
+  },
+  "dependencies": {
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-node": "^8.0.1",
+    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "phaser": "^3.55.2",
+    "phaser-animated-tiles": "^2.0.2",    
+    "socket.io": "^2.2.0",
+    "socket.io-client": "^2.2.0",
+    "idiom.js": "^1.0.1"
+  }
 }

@@ -1,7 +1,7 @@
-import Phaser from 'phaser'
-const docElement = document.documentElement
-const width = docElement.clientWidth > '100%' ? '100%' : docElement.clientWidth
-const height = docElement.clientHeight > '100%' ? '100%' : docElement.clientHeight
+import Phaser from 'phaser';
+const docElement = document.documentElement;
+const width = docElement.clientWidth > '100%' ? '100%' : docElement.clientWidth;
+const height = docElement.clientHeight > '100%' ? '100%' : docElement.clientHeight;
 export default {
   width: width * 2,
   height: height * 2,
@@ -9,11 +9,13 @@ export default {
   physics: {
     default: 'arcade',
     arcade: {
-      gravity: { y: 0 }
+      gravity: {
+        y: 0
+      }
     }
   },
   parent: ['login'],
   dom: {
     createContainer: true
   }
-}
+};
