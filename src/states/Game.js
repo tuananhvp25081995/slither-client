@@ -39,6 +39,7 @@ export default class Game extends Phaser.Scene {
     const gameWidth = this.game.config.width;
     const gameHeight = this.game.config.height;
     this.add.tileSprite(0, 0, gameWidth * 3, gameHeight * 3, 'background');
+    this.physics.world.setBounds(-gameWidth * 3 / 2, -gameHeight * 3 / 2, gameWidth * 3, gameHeight * 3);
 
     this.cameras.main.width = gameWidth / 2;
     this.cameras.main.height = gameHeight / 2;
@@ -59,12 +60,13 @@ export default class Game extends Phaser.Scene {
         this.game.playerSnake = snake;
         isInitSnake = true;
         this.cameras.main.startFollow(snake.head);
+        this.cameras.main.setLerp(0.05);
       }
     });
 
     this.socket.on(SOCKET_EVENT.SERVER_UPDATE_ALL_PLAYERS, (e) => {
       const data = JSON.parse(e);
-      console.log(data)
+      console.log(data);
     });
 
     // plusRunes = new PowerRune(this, snake.head, 'plus', 10, { x: -100, y: -100 }, { x: 750, y: 550 });
@@ -136,7 +138,7 @@ export default class Game extends Phaser.Scene {
         this.game.snakes[i].update(meTest);
       }
       const pointer = this.input.activePointer.updateWorldPoint(this.cameras.main);
-
+ 
       const event = {
         x: pointer.worldX,
         y: pointer.worldY
