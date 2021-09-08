@@ -8,7 +8,6 @@ import {
 export default class Countdown extends Phaser.Scene {
   preload () {
     this.socket = getWS();
-    console.log(this.data);
   }
 
   create () {
@@ -19,7 +18,6 @@ export default class Countdown extends Phaser.Scene {
     self.notice.setOrigin(0.5, 0.5);
 
     self.socket.on(SOCKET_EVENT.COUNTDOWN, (e) => {
-      console.log(e);
       const {
         Data
       } = JSON.parse(e.text);
@@ -30,7 +28,6 @@ export default class Countdown extends Phaser.Scene {
     });
 
     self.socket.on('game:notify', function (msg) {
-      console.log('notify', msg);
       const {
         Data
       } = JSON.parse(msg.text);

@@ -180,7 +180,6 @@ function getFood (game, type, quantity, scale, positionX, positionY) {
 }
 // destroy food
 function spriteHitFood (sprite, health) {
-  console.log('aaa');
   // foodGroup.killAndHide(health)
   // foodGroup.destroy();
 }
