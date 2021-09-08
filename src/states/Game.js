@@ -150,9 +150,7 @@ export default class Game extends Phaser.Scene {
           y: pointer.worldY
         }
       };
-      this.socket.emit(SOCKET_EVENT.PLAYERSENDTARGET, event, (res) => {
-        console.log('OK', res);
-      });
+      this.socket.emit(SOCKET_EVENT.PLAYERSENDTARGET, event);
     }
   }
 }
