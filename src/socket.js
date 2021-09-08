@@ -41,7 +41,7 @@ export const getWS = () => {
   return socket;
 };
 
-export const setUID = (guid = '', uuid = '') => {
+export const setUID = (uuid = '', guid = '') => {
   UUID = uuid;
   GUID = guid;
 }
