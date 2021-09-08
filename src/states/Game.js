@@ -38,8 +38,8 @@ export default class Game extends Phaser.Scene {
     // Always add map first. Everything else is added after map.
     const gameWidth = this.game.config.width;
     const gameHeight = this.game.config.height;
-    this.add.tileSprite(0, 0, gameWidth * 3, gameHeight * 3, 'background');
     this.physics.world.setBounds(-gameWidth * 3 / 2, -gameHeight * 3 / 2, gameWidth * 3, gameHeight * 3);
+    this.add.tileSprite(0, 0, this.physics.world.bounds.width, this.physics.world.bounds.height, 'background');
 
     this.cameras.main.width = gameWidth / 2;
     this.cameras.main.height = gameHeight / 2;
@@ -60,7 +60,8 @@ export default class Game extends Phaser.Scene {
         this.game.playerSnake = snake;
         isInitSnake = true;
         this.cameras.main.startFollow(snake.head);
-        this.cameras.main.setLerp(0.05);
+        this.cameras.main.setLerp(0.3);
+        this.cameras.main.setBounds(-gameWidth * 3 / 2, -gameHeight * 3 / 2, gameWidth * 3, gameHeight * 3);
       }
     });
 

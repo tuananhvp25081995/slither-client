@@ -166,6 +166,8 @@ export default class extends Phaser.GameObjects.Sprite {
       if (this.tweens[i].isPlaying() && snakeSections[i]) {
         this.tweens[i].updateTo('x', snakeSections[i].x, true);
         this.tweens[i].updateTo('y', snakeSections[i].y, true);
+        this.dotSnake.x = snakeSections[i].x;
+        this.dotSnake.y = snakeSections[i].y;
       }
     }
   }
