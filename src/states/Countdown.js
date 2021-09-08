@@ -8,6 +8,7 @@ import {
 export default class Countdown extends Phaser.Scene {
   preload () {
     this.socket = getWS();
+    console.log(this.data);
   }
 
   create () {
@@ -18,16 +19,21 @@ export default class Countdown extends Phaser.Scene {
     self.notice.setOrigin(0.5, 0.5);
 
     self.socket.on(SOCKET_EVENT.COUNTDOWN, (e) => {
+      console.log(e);
       const {
         Data
-      } = JSON.parse(e);
+      } = JSON.parse(e.text);
       self.notice.setText(Data);
+      if (Data === 'Start Game.') {
+        self.scene.start('game');
+      }
     });
 
     self.socket.on('game:notify', function (msg) {
+      console.log('notify', msg);
       const {
         Data
-      } = JSON.parse(msg);
+      } = JSON.parse(msg.text);
       if (Data === 'Start Game.') {
         self.scene.start('game');
       }

@@ -3,7 +3,8 @@ import Snake from '../sprites/Snake';
 import Slot from '../sprites/Slot';
 import Timer from '../sprites/Timer';
 import {
-  getWS
+  getWS,
+  getUID
 } from '../socket';
 import CircleBorder from '../sprites/CircleBorder';
 import Leaderboard from '../sprites/Leaderboard';
@@ -24,6 +25,7 @@ let gameStart = 0;
 let firstServerTimestamp = 0;
 let isInitSnake = false;
 let meTest = {};
+let otherPlayers = [];
 
 export default class Game extends Phaser.Scene {
   preload () {
@@ -46,7 +48,7 @@ export default class Game extends Phaser.Scene {
     this.game.snakes = [];
 
     this.socket.on(SOCKET_EVENT.SERVER_TELL_PLAYER_TO_MOVE, (e) => {
-      const playerData = JSON.parse(e);
+      const playerData = JSON.parse(e.text);
       meTest = playerData;
       console.log(playerData);
       if (!isInitSnake) {
@@ -59,12 +61,15 @@ export default class Game extends Phaser.Scene {
         this.game.playerSnake = snake;
         isInitSnake = true;
         this.cameras.main.startFollow(snake.head);
+        this.cameras.main.setLerp(0.05)
       }
     });
 
     this.socket.on(SOCKET_EVENT.SERVER_UPDATE_ALL_PLAYERS, (e) => {
-      const data = JSON.parse(e);
-      console.log(data)
+      const {
+        data
+      } = JSON.parse(e.text);
+      otherPlayers = [...data];
     });
 
     // plusRunes = new PowerRune(this, snake.head, 'plus', 10, { x: -100, y: -100 }, { x: 750, y: 550 });
@@ -136,12 +141,18 @@ export default class Game extends Phaser.Scene {
         this.game.snakes[i].update(meTest);
       }
       const pointer = this.input.activePointer.updateWorldPoint(this.cameras.main);
-
+      const uid = getUID();
       const event = {
-        x: pointer.worldX,
-        y: pointer.worldY
+        GUID: uid.guid,
+        UUID: uid.uuid,
+        body: {
+          x: pointer.worldX,
+          y: pointer.worldY
+        }
       };
-      this.socket.emit(SOCKET_EVENT.PLAYERSENDTARGET, JSON.stringify(event));
+      this.socket.emit(SOCKET_EVENT.PLAYERSENDTARGET, event, (res) => {
+        console.log('OK', res);
+      });
     }
   }
 }

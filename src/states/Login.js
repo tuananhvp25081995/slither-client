@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import {
-  getWS
+  getWS,
+  setUID
 } from '../socket';
 import {
   SOCKET_EVENT
@@ -28,10 +29,14 @@ export default class Login extends Phaser.Scene {
         const inputText = this.getChildByName('usernameField').value;
         if (inputText !== '') {
           localStorage.setItem('username', inputText);
-          self.socket.emit(SOCKET_EVENT.GOTIT, JSON.stringify({
-            name: inputText
-          }));
-          self.scene.start('countdown');
+          self.socket.emit(SOCKET_EVENT.GOTIT, {
+            body: {
+              name: inputText
+            }
+          }, (res) => {
+            setUID(res.body.UUID, res.body.GUID)
+            self.scene.start('countdown');
+          });
         }
       }
     });
