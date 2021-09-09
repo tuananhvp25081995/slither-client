@@ -18,7 +18,7 @@ export default class Boot extends Phaser.Scene {
     this.load.image('skill4', 'assets/images/skill4.png');
     this.load.html('leaderboard', 'assets/html/leaderboard.html');
     this.load.html('loginform', 'assets/html/login.html');
-    initWs('match');
+    initWs();
   }
 
   create () {
