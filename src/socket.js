@@ -6,7 +6,7 @@ const debug = function (args) {
   }
 };
 export const initWs = (nameSpace = '') => {
-  socket = io(`ws://127.0.0.1:8080/${nameSpace}`, {
+  socket = io(`http://127.0.0.1:8080/${nameSpace}`, {
     transports: ['polling']
   });
 

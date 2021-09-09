@@ -23,8 +23,10 @@ const gameUpdates = [];
 let gameStart = 0;
 let firstServerTimestamp = 0;
 let isInitSnake = false;
-let meTest = {};
+let isInitSnakes = false;
 
+let meTest = {};
+let snakeData = [];
 export default class Game extends Phaser.Scene {
   preload () {
     this.socket = getWS();
@@ -49,7 +51,7 @@ export default class Game extends Phaser.Scene {
     this.socket.on(SOCKET_EVENT.SERVER_TELL_PLAYER_TO_MOVE, (e) => {
       const playerData = JSON.parse(e);
       meTest = playerData;
-      console.log(playerData);
+      // console.log(playerData);
       if (!isInitSnake) {
         // Init Snake
         const circleSnake = [...playerData.circleSnake];
@@ -66,6 +68,22 @@ export default class Game extends Phaser.Scene {
 
     this.socket.on(SOCKET_EVENT.SERVER_UPDATE_ALL_PLAYERS, (e) => {
       const data = JSON.parse(e);
+      // console.log(data);
+      snakeData = data.data;
+      if (!isInitSnakes) {
+        // Init Snakes
+
+        for (const item of snakeData) {
+          const circleSnake = [...item.circleSnake];
+          const head = circleSnake.shift();
+          const snake = new Snake(this, head.x, head.y, 'circle');
+          snake.initSections(circleSnake);
+          isInitSnakes = true;
+        }
+      }
+    });
+    this.socket.on(SOCKET_EVENT.SERVER_UPDATE_FOOD, (e) => {
+      const data = JSON.parse(e);
       console.log(data);
     });
 
@@ -80,14 +98,14 @@ export default class Game extends Phaser.Scene {
     //     // getFood(this, 'food', 1, foodData.Radius, { min: -foodData.X, max: foodData.X }, { min: -foodData.Y, max: foodData.Y });
     //   });
     // }
-    healthGroup = this.physics.add.staticGroup({
-      key: 'plus',
-      frameQuantity: 10,
-      immovable: true,
-      setScale: {
-        x: 0.1, y: 0.1
-      }
-    });
+    // healthGroup = this.physics.add.staticGroup({
+    //   key: 'plus',
+    //   frameQuantity: 10,
+    //   immovable: true,
+    //   setScale: {
+    //     x: 0.1, y: 0.1
+    //   }
+    // });
 
     const children = healthGroup.getChildren();
 
@@ -130,12 +148,12 @@ export default class Game extends Phaser.Scene {
   }
 
   update (time, delta) {
-    if (isInitSnake) {
+    if (isInitSnake && isInitSnakes) {
       // const { me } = getCurrentState()
 
       this.slot.update();
       for (let i = this.game.snakes.length - 1; i >= 0; i--) {
-        this.game.snakes[i].update(meTest);
+        this.game.snakes[i].update(snakeData[i]);
       }
       const pointer = this.input.activePointer.updateWorldPoint(this.cameras.main);
  

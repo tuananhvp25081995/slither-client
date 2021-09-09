@@ -46,7 +46,7 @@ export default class extends Phaser.GameObjects.Sprite {
     // this.sectionGroup = this.scene.physics.add.group()
     this.sectionGroup = this.scene.add.container(0, 0);
     // add nick name
-    nickName = localStorage.getItem('username');
+    // nickName = localStorage.getItem('username')
     this.textPosition = this.scene.add.text(x, y, nickName, {
       fontFamily: 'sans-serif',
       fontSize: '20px',
@@ -72,8 +72,19 @@ export default class extends Phaser.GameObjects.Sprite {
     // init eyes
     // this.eyes = new EyePair(this.scene, this.head, this.scale);
 
-    this.onDestroyedCallbacks = [];
-    this.onDestroyedContexts = [];
+    // this.sections.forEach((sec) => {
+    //   const tween = this.scene.tweens.add({
+    //     targets: sec,
+    //     x,
+    //     y,
+    //     ease: 'Linear',
+    //     duration: 1000
+    //   })
+    //   this.tweens.push(tween)
+    // })
+
+    this.onDestroyedCallbacks = []
+    this.onDestroyedContexts = []
 
     // the edge is the front body that can collide with other snakes
     // it is locked to the head of this snake
