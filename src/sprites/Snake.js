@@ -31,7 +31,6 @@ export default class extends Phaser.GameObjects.Sprite {
     // init
     // this.collisionGroup = this.scene.physics.p2.createCollisionGroup()
     this.sections = [];
-    this.headPath = [];
     this.tweens = [];
     this.food = [];
     this.preferredDistance = 17 * this.scale;
@@ -55,7 +54,7 @@ export default class extends Phaser.GameObjects.Sprite {
     // add nickname
     // this.sectionGroup.setSize(300, 300)
     this.scene.physics.world.enable(this.sectionGroup);
-    this.sectionGroup.body.setCollideWorldBounds(true);
+    // this.sectionGroup.body.setCollideWorldBounds(true);
     // this.scene.physics.add.existing(this.sectionGroup);
 
     // add the head of the snake
@@ -156,7 +155,6 @@ export default class extends Phaser.GameObjects.Sprite {
   initSections (snakeSections = []) {
     snakeSections.forEach((section) => {
       this.addSectionAtPosition(section.x, section.y);
-      this.headPath.push(new Phaser.Geom.Point(section.x, section.y));
     });
   }
 
@@ -169,6 +167,10 @@ export default class extends Phaser.GameObjects.Sprite {
       return;
     }
     const snakeSections = [...snakeDataUpdate.circleSnake];
+    if (snakeSections.length === this.tweens.length + 1) {
+      const section = snakeSections[snakeSections.length - 1]
+      this.addSectionAtPosition(section.x, section.y);
+    }
     for (let i = 0; i < snakeSections.length; i++) {
       // this.sections[i].body.x = snakeSections[i].x;
       // this.sections[i].body.y = snakeSections[i].y;
@@ -177,6 +179,8 @@ export default class extends Phaser.GameObjects.Sprite {
       if (this.tweens[i].isPlaying() && snakeSections[i]) {
         this.tweens[i].updateTo('x', snakeSections[i].x, true);
         this.tweens[i].updateTo('y', snakeSections[i].y, true);
+        this.dotSnake.x = snakeSections[i].x;
+        this.dotSnake.y = snakeSections[i].y;
       }
     }
   }

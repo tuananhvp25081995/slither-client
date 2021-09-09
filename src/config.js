@@ -14,7 +14,7 @@ export default {
       }
     }
   },
-  parent: ['login'],
+  parent: 'content',
   dom: {
     createContainer: true
   }

@@ -3,7 +3,8 @@ import Snake from '../sprites/Snake';
 import Slot from '../sprites/Slot';
 import Timer from '../sprites/Timer';
 import {
-  getWS
+  getWS,
+  getUID
 } from '../socket';
 import CircleBorder from '../sprites/CircleBorder';
 import Leaderboard from '../sprites/Leaderboard';
@@ -15,18 +16,17 @@ let snake;
 let Circle;
 let healthGroup;
 let foodGroup;
-const foodData = [];
-const flag = false;
+let foodData = [];
+const flag = true;
 
 const RENDER_DELAY = 20;
 const gameUpdates = [];
 let gameStart = 0;
 let firstServerTimestamp = 0;
 let isInitSnake = false;
-let isInitSnakes = false;
-
 let meTest = {};
-let snakeData = [];
+let otherPlayers = [];
+const snakeData = [];
 export default class Game extends Phaser.Scene {
   preload () {
     this.socket = getWS();
@@ -40,8 +40,8 @@ export default class Game extends Phaser.Scene {
     // Always add map first. Everything else is added after map.
     const gameWidth = this.game.config.width;
     const gameHeight = this.game.config.height;
-    this.add.tileSprite(0, 0, gameWidth * 3, gameHeight * 3, 'background');
     this.physics.world.setBounds(-gameWidth * 3 / 2, -gameHeight * 3 / 2, gameWidth * 3, gameHeight * 3);
+    this.add.tileSprite(0, 0, this.physics.world.bounds.width, this.physics.world.bounds.height, 'background');
 
     this.cameras.main.width = gameWidth / 2;
     this.cameras.main.height = gameHeight / 2;
@@ -49,9 +49,9 @@ export default class Game extends Phaser.Scene {
     this.game.snakes = [];
 
     this.socket.on(SOCKET_EVENT.SERVER_TELL_PLAYER_TO_MOVE, (e) => {
-      const playerData = JSON.parse(e);
+      const playerData = JSON.parse(e.text);
       meTest = playerData;
-      // console.log(playerData);
+      console.log(playerData.circleSnake.length);
       if (!isInitSnake) {
         // Init Snake
         const circleSnake = [...playerData.circleSnake];
@@ -62,31 +62,29 @@ export default class Game extends Phaser.Scene {
         this.game.playerSnake = snake;
         isInitSnake = true;
         this.cameras.main.startFollow(snake.head);
-        this.cameras.main.setLerp(0.05);
+        this.cameras.main.setLerp(0.3);
+        // this.cameras.main.setBounds(-gameWidth * 3 / 2, -gameHeight * 3 / 2, gameWidth * 3, gameHeight * 3);
       }
     });
 
     this.socket.on(SOCKET_EVENT.SERVER_UPDATE_ALL_PLAYERS, (e) => {
-      const data = JSON.parse(e);
-      // console.log(data);
-      snakeData = data.data;
-      if (!isInitSnakes) {
-        // Init Snakes
-
-        for (const item of snakeData) {
-          const circleSnake = [...item.circleSnake];
-          const head = circleSnake.shift();
-          const snake = new Snake(this, head.x, head.y, 'circle');
-          snake.initSections(circleSnake);
-          isInitSnakes = true;
-        }
-      }
+      const {
+        data
+      } = JSON.parse(e.text);
+      otherPlayers = [...data];
     });
+
     this.socket.on(SOCKET_EVENT.SERVER_UPDATE_FOOD, (e) => {
-      const data = JSON.parse(e);
-      console.log(data);
-    });
-
+      const {
+        data
+      } = JSON.parse(e.text);
+      if (foodData.length !== data.length) {
+        foodData = [...data];
+        console.log(foodData);
+        getFood(this, foodData);
+      }
+    }
+    );
     // plusRunes = new PowerRune(this, snake.head, 'plus', 10, { x: -100, y: -100 }, { x: 750, y: 550 });
     //  When the player sprite his the health packs, call this function ...
     // this.physics.add.overlap(snake.head, plusRunes.healthGroup, plusRunes.spriteHitHealth());
@@ -107,16 +105,16 @@ export default class Game extends Phaser.Scene {
     //   }
     // });
 
-    const children = healthGroup.getChildren();
+    // const children = healthGroup.getChildren();
 
-    for (let i = 0; i < children.length; i++) {
-      const x = Phaser.Math.Between(1000, 1750);
-      const y = Phaser.Math.Between(1000, 1550);
+    // for (let i = 0; i < children.length; i++) {
+    //   const x = Phaser.Math.Between(1000, 1750);
+    //   const y = Phaser.Math.Between(1000, 1550);
 
-      children[i].setPosition(x, y);
-    }
+    //   children[i].setPosition(x, y);
+    // }
 
-    healthGroup.refresh();
+    // healthGroup.refresh();
 
     //  When the player sprite hits the foods, call this function ...
     // this.physics.add.overlap(snake.head, healthGroup, this.spriteHitHealth)
@@ -148,50 +146,49 @@ export default class Game extends Phaser.Scene {
   }
 
   update (time, delta) {
-    if (isInitSnake && isInitSnakes) {
+    if (isInitSnake) {
       // const { me } = getCurrentState()
 
       this.slot.update();
       for (let i = this.game.snakes.length - 1; i >= 0; i--) {
-        this.game.snakes[i].update(snakeData[i]);
+        this.game.snakes[i].update(meTest);
       }
       const pointer = this.input.activePointer.updateWorldPoint(this.cameras.main);
- 
+      const uid = getUID();
       const event = {
-        x: pointer.worldX,
-        y: pointer.worldY
+        GUID: uid.guid,
+        UUID: uid.uuid,
+        body: {
+          x: pointer.worldX,
+          y: pointer.worldY
+        }
       };
-      this.socket.emit(SOCKET_EVENT.PLAYERSENDTARGET, JSON.stringify(event));
+      this.socket.emit(SOCKET_EVENT.PLAYERSENDTARGET, event);
     }
   }
 }
 
-function getFood (game, type, quantity, scale, positionX, positionY) {
+function getFood (game, data) {
   foodGroup = game.physics.add.staticGroup({
-    key: type,
-    frameQuantity: quantity,
-    immovable: true,
-    setScale: {
-      x: scale / 3, y: scale / 3
-    }
+    key: 'food',
+    frameQuantity: data.length,
+    immovable: true
+    // setScale: {
+    //   x: scale / 3, y: scale / 3
+    // }
   });
-  if (flag) {
-    foodGroup.destroy();
-  } else {
-    const childrenFood = foodGroup.getChildren();
-    for (let i = 0; i < childrenFood.length; i++) {
-      const x = Phaser.Math.Between(positionX.min, positionX.max);
-      const y = Phaser.Math.Between(positionY.min, positionY.max);
 
-      childrenFood[i].setPosition(x, y);
-    }
-    foodGroup.refresh();
-    game.physics.add.overlap(snake.head, foodGroup, spriteHitFood);
+  const childrenFood = foodGroup.getChildren();
+  for (let i = 0; i < childrenFood.length; i++) {
+    const x = data[i].x;
+    const y = data[i].y;
+    childrenFood[i].setPosition(x, y);
   }
+  foodGroup.refresh();
+  // game.physics.add.overlap(snake.head, foodGroup, spriteHitFood);
 }
 // destroy food
 function spriteHitFood (sprite, health) {
-  console.log('aaa');
   // foodGroup.killAndHide(health)
   // foodGroup.destroy();
 }
