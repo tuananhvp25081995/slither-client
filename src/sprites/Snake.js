@@ -59,6 +59,7 @@ export default class extends Phaser.GameObjects.Sprite {
 
     // add the head of the snake
     this.head = this.addSectionAtPosition(x, y);
+    // this.head.body.setCollideWorldBounds(true);
     this.head.name = 'head';
     this.head.snake = this;
 
@@ -69,17 +70,6 @@ export default class extends Phaser.GameObjects.Sprite {
 
     // init eyes
     // this.eyes = new EyePair(this.scene, this.head, this.scale);
-
-    // this.sections.forEach((sec) => {
-    //   const tween = this.scene.tweens.add({
-    //     targets: sec,
-    //     x,
-    //     y,
-    //     ease: 'Linear',
-    //     duration: 3000
-    //   });
-    //   this.tweens.push(tween);
-    // });
 
     this.onDestroyedCallbacks = [];
     this.onDestroyedContexts = [];
@@ -133,15 +123,19 @@ export default class extends Phaser.GameObjects.Sprite {
     // add circle
     // sec.body.clearShapes();
     sec.body.setCircle(sec.width * 0.5);
+   
+    sec.body.setCollideWorldBounds(true);
+    // sec.body.setBoundsRectangle(new Phaser.Geom.Rectangle(-this.mapSize.width / 2, -this.mapSize.height / 2, this.mapSize.width, this.mapSize.height));
 
     const tween = this.scene.tweens.add({
       targets: sec,
       x: x,
       y: y,
       ease: 'Linear',
-      duration: 1000
+      duration: 3000
     });
     this.tweens.push(tween);
+
     // add shadow
     // this.shadow.add(x, y);
     return sec;
@@ -174,6 +168,8 @@ export default class extends Phaser.GameObjects.Sprite {
       if (this.tweens[i].isPlaying() && snakeSections[i]) {
         this.tweens[i].updateTo('x', snakeSections[i].x, true);
         this.tweens[i].updateTo('y', snakeSections[i].y, true);
+        this.dotSnake.x = snakeSections[i].x;
+        this.dotSnake.y = snakeSections[i].y;
       }
     }
   }
