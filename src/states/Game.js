@@ -48,31 +48,36 @@ export default class Game extends Phaser.Scene {
 
     this.game.snakes = [];
 
-    this.socket.on(SOCKET_EVENT.SERVER_TELL_PLAYER_TO_MOVE, (e) => {
-      const playerData = JSON.parse(e.text);
-      meTest = playerData;
-      console.log(playerData.circleSnake.length);
-      if (!isInitSnake) {
-        // Init Snake
-        const circleSnake = [...playerData.circleSnake];
-        const head = circleSnake.shift();
-
-        const snake = new Snake(this, head.x, head.y, 'circle');
-        snake.initSections(circleSnake);
-        this.game.playerSnake = snake;
-        isInitSnake = true;
-        this.cameras.main.startFollow(snake.head);
-        this.cameras.main.setLerp(0.3);
-        // this.cameras.main.setBounds(-gameWidth * 3 / 2, -gameHeight * 3 / 2, gameWidth * 3, gameHeight * 3);
-      }
-    });
-
     this.socket.on(SOCKET_EVENT.SERVER_UPDATE_ALL_PLAYERS, (e) => {
       const {
         data
       } = JSON.parse(e.text);
-      otherPlayers = [...data];
+      meTest = data;
+      // console.log(playerData.circleSnake.length);
+      if (!isInitSnake) {
+        // Init Snake
+        data.forEach(snakeData => {
+          const circleSnake = [...snakeData.circleSnake];
+          const head = circleSnake.shift();
+  
+          const snake = new Snake(this, head.x, head.y, 'circle');
+          snake.initSections(circleSnake);
+          this.cameras.main.startFollow(snake.head);
+          this.cameras.main.setLerp(0.05);
+          this.game.snakes.push(snake);
+        });
+ 
+        isInitSnake = true;
+        // this.cameras.main.setBounds(-gameWidth * 3 / 2, -gameHeight * 3 / 2, gameWidth * 3, gameHeight * 3);
+      }
     });
+
+    // this.socket.on(SOCKET_EVENT.SERVER_UPDATE_ALL_PLAYERS, (e) => {
+    //   const {
+    //     data
+    //   } = JSON.parse(e.text);
+    //   otherPlayers = [...data];
+    // });
 
     this.socket.on(SOCKET_EVENT.SERVER_UPDATE_FOOD, (e) => {
       const {
@@ -80,7 +85,7 @@ export default class Game extends Phaser.Scene {
       } = JSON.parse(e.text);
       if (foodData.length !== data.length) {
         foodData = [...data];
-        console.log(foodData);
+        //  console.log(foodData);
         getFood(this, foodData);
       }
     }
@@ -151,7 +156,7 @@ export default class Game extends Phaser.Scene {
 
       this.slot.update();
       for (let i = this.game.snakes.length - 1; i >= 0; i--) {
-        this.game.snakes[i].update(meTest);
+        this.game.snakes[i].update(meTest[i]);
       }
       const pointer = this.input.activePointer.updateWorldPoint(this.cameras.main);
       const uid = getUID();

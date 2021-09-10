@@ -167,7 +167,7 @@ export default class extends Phaser.GameObjects.Sprite {
       return;
     }
     const snakeSections = [...snakeDataUpdate.circleSnake];
-    if (snakeSections.length === this.tweens.length + 1) {
+    if (snakeSections.length > this.tweens.length) {
       const section = snakeSections[snakeSections.length - 1]
       this.addSectionAtPosition(section.x, section.y);
     }
@@ -175,8 +175,8 @@ export default class extends Phaser.GameObjects.Sprite {
       // this.sections[i].body.x = snakeSections[i].x;
       // this.sections[i].body.y = snakeSections[i].y;
 
-      this.tweens[i].play();
-      if (this.tweens[i].isPlaying() && snakeSections[i]) {
+      this.tweens[i]?.play();
+      if (this.tweens[i] && this.tweens[i].isPlaying() && snakeSections[i]) {
         this.tweens[i].updateTo('x', snakeSections[i].x, true);
         this.tweens[i].updateTo('y', snakeSections[i].y, true);
         this.dotSnake.x = snakeSections[i].x;
