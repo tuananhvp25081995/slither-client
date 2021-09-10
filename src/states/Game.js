@@ -56,15 +56,19 @@ export default class Game extends Phaser.Scene {
       // console.log(playerData.circleSnake.length);
       if (!isInitSnake) {
         // Init Snake
+        const { UUID } = getUID()
         data.forEach(snakeData => {
           const circleSnake = [...snakeData.circleSnake];
           const head = circleSnake.shift();
-  
+          console.log(snakeData);
           const snake = new Snake(this, head.x, head.y, 'circle');
           snake.initSections(circleSnake);
-          this.cameras.main.startFollow(snake.head);
-          this.cameras.main.setLerp(0.05);
+          if (UUID === circleSnake.uuid) {
+            this.cameras.main.startFollow(snake.head);
+          };
           this.game.snakes.push(snake);
+          
+          this.cameras.main.setLerp(0.05)
         });
  
         isInitSnake = true;
