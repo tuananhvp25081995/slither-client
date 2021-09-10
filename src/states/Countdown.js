@@ -20,7 +20,7 @@ export default class Countdown extends Phaser.Scene {
     self.socket.on(SOCKET_EVENT.COUNTDOWN, (e) => {
       const {
         Data
-      } = JSON.parse(e.text);
+      } = JSON.parse(e);
       self.notice.setText(Data);
       if (Data === 'Start Game.') {
         self.scene.start('game');
@@ -30,7 +30,7 @@ export default class Countdown extends Phaser.Scene {
     self.socket.on('game:notify', function (msg) {
       const {
         Data
-      } = JSON.parse(msg.text);
+      } = JSON.parse(msg);
       if (Data === 'Start Game.') {
         self.scene.start('game');
       }

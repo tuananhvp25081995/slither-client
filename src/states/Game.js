@@ -49,28 +49,24 @@ export default class Game extends Phaser.Scene {
     this.socket.on(SOCKET_EVENT.SERVER_UPDATE_ALL_PLAYERS, (e) => {
       const {
         data
-      } = JSON.parse(e.text);
+      } = JSON.parse(e);
       meTest = data;
-      // console.log(playerData.circleSnake.length);
       if (!isInitSnake) {
         // Init Snake
-        const { UUID } = getUID()
         data.forEach(snakeData => {
           const circleSnake = [...snakeData.circleSnake];
           const head = circleSnake.shift();
           console.log(snakeData);
           const snake = new Snake(this, head.x, head.y, 'circle');
-          this.game.playerSnake = snake;
           snake.initSections(circleSnake);
-          if (UUID === circleSnake.uuid) {
-            this.cameras.main.startFollow(snake.head);
-          };
+          // this.game.playerSnake = snake;
+          this.cameras.main.startFollow(snake.head);
           
-          this.cameras.main.setLerp(0.05)
+          this.cameras.main.setLerp(0.05);
         });
  
         isInitSnake = true;
-        // this.cameras.main.setBounds(-gameWidth * 3 / 2, -gameHeight * 3 / 2, gameWidth * 3, gameHeight * 3);
+        this.cameras.main.setBounds(-gameWidth * 3 / 2, -gameHeight * 3 / 2, gameWidth * 3, gameHeight * 3);
       }
     });
 
@@ -161,15 +157,10 @@ export default class Game extends Phaser.Scene {
         this.game.snakes[i].update(meTest[i]);
       }
       const pointer = this.input.activePointer.updateWorldPoint(this.cameras.main);
-      const uid = getUID();
-      const event = {
-        GUID: uid.guid,
-        UUID: uid.uuid,
-        body: {
-          x: pointer.worldX,
-          y: pointer.worldY
-        }
-      };
+      const event = JSON.stringify({
+        x: pointer.worldX,
+        y: pointer.worldY
+      });
       this.socket.emit(SOCKET_EVENT.PLAYERSENDTARGET, event);
     }
   }
