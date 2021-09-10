@@ -25,8 +25,6 @@ let gameStart = 0;
 let firstServerTimestamp = 0;
 let isInitSnake = false;
 let meTest = {};
-let otherPlayers = [];
-const snakeData = [];
 export default class Game extends Phaser.Scene {
   preload () {
     this.socket = getWS();
@@ -62,11 +60,11 @@ export default class Game extends Phaser.Scene {
           const head = circleSnake.shift();
           console.log(snakeData);
           const snake = new Snake(this, head.x, head.y, 'circle');
+          this.game.playerSnake = snake;
           snake.initSections(circleSnake);
           if (UUID === circleSnake.uuid) {
             this.cameras.main.startFollow(snake.head);
           };
-          this.game.snakes.push(snake);
           
           this.cameras.main.setLerp(0.05)
         });
@@ -157,7 +155,7 @@ export default class Game extends Phaser.Scene {
   update (time, delta) {
     if (isInitSnake) {
       // const { me } = getCurrentState()
-
+      console.log(this.game.snakes.length);
       this.slot.update();
       for (let i = this.game.snakes.length - 1; i >= 0; i--) {
         this.game.snakes[i].update(meTest[i]);
