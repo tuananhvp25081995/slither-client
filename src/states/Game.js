@@ -25,6 +25,8 @@ let gameStart = 0;
 let firstServerTimestamp = 0;
 let isInitSnake = false;
 let meTest = {};
+
+let lastTimeUpdate = 0;
 export default class Game extends Phaser.Scene {
   preload () {
     this.socket = getWS();
@@ -33,12 +35,12 @@ export default class Game extends Phaser.Scene {
   create () {
     gameStart = 0;
     firstServerTimestamp = 0;
-    // const name = localStorage.getItem('username')
+    const name = localStorage.getItem('username');
 
     // Always add map first. Everything else is added after map.
     const gameWidth = this.game.config.width;
     const gameHeight = this.game.config.height;
-    this.physics.world.setBounds(-gameWidth * 3 / 2, -gameHeight * 3 / 2, gameWidth * 3, gameHeight * 3);
+    this.physics.world.setBounds(-5000, -5000, 10000, 10000);
     this.add.tileSprite(0, 0, this.physics.world.bounds.width, this.physics.world.bounds.height, 'background');
 
     this.cameras.main.width = gameWidth / 2;
@@ -59,14 +61,16 @@ export default class Game extends Phaser.Scene {
           console.log(snakeData);
           const snake = new Snake(this, head.x, head.y, 'circle');
           snake.initSections(circleSnake);
-          // this.game.playerSnake = snake;
-          this.cameras.main.startFollow(snake.head);
+          if (snakeData.id === name) {
+            this.game.playerSnake = snake;
+            this.cameras.main.startFollow(snake.head);
+          }
           
           this.cameras.main.setLerp(0.05);
         });
  
         isInitSnake = true;
-        this.cameras.main.setBounds(-gameWidth * 3 / 2, -gameHeight * 3 / 2, gameWidth * 3, gameHeight * 3);
+        this.physics.world.setBounds(-5000, -5000, 10000, 10000);
       }
     });
 
@@ -77,17 +81,17 @@ export default class Game extends Phaser.Scene {
     //   otherPlayers = [...data];
     // });
 
-    this.socket.on(SOCKET_EVENT.SERVER_UPDATE_FOOD, (e) => {
-      const {
-        data
-      } = JSON.parse(e.text);
-      if (foodData.length !== data.length) {
-        foodData = [...data];
-        //  console.log(foodData);
-        getFood(this, foodData);
-      }
-    }
-    );
+    // this.socket.on(SOCKET_EVENT.SERVER_UPDATE_FOOD, (e) => {
+    //   const {
+    //     data
+    //   } = JSON.parse(e.text);
+    //   if (foodData.length !== data.length) {
+    //     foodData = [...data];
+    //     //  console.log(foodData);
+    //     getFood(this, foodData);
+    //   }
+    // }
+    // );
     // plusRunes = new PowerRune(this, snake.head, 'plus', 10, { x: -100, y: -100 }, { x: 750, y: 550 });
     //  When the player sprite his the health packs, call this function ...
     // this.physics.add.overlap(snake.head, plusRunes.healthGroup, plusRunes.spriteHitHealth());
@@ -147,11 +151,11 @@ export default class Game extends Phaser.Scene {
   spriteHitHealth (sprite, health) {
     healthGroup.killAndHide(health);
   }
-
   update (time, delta) {
+    console.log(delta);
+    lastTimeUpdate = Date.now();
     if (isInitSnake) {
       // const { me } = getCurrentState()
-      console.log(this.game.snakes.length);
       this.slot.update();
       for (let i = this.game.snakes.length - 1; i >= 0; i--) {
         this.game.snakes[i].update(meTest[i]);

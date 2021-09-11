@@ -10,9 +10,7 @@ export default {
   physics: {
     default: 'arcade',
     arcade: {
-      gravity: {
-        y: 0
-      }
+      gravity: false
     }
   },
   parent: 'content',
