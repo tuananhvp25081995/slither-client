@@ -25,8 +25,7 @@ let gameStart = 0;
 let firstServerTimestamp = 0;
 let isInitSnake = false;
 let meTest = {};
-let otherPlayers = [];
-const snakeData = [];
+
 export default class Game extends Phaser.Scene {
   preload () {
     this.socket = getWS();
@@ -35,12 +34,12 @@ export default class Game extends Phaser.Scene {
   create () {
     gameStart = 0;
     firstServerTimestamp = 0;
-    // const name = localStorage.getItem('username')
+    const name = localStorage.getItem('username');
 
     // Always add map first. Everything else is added after map.
     const gameWidth = this.game.config.width;
     const gameHeight = this.game.config.height;
-    this.physics.world.setBounds(-gameWidth * 3 / 2, -gameHeight * 3 / 2, gameWidth * 3, gameHeight * 3);
+    this.physics.world.setBounds(-5000, -5000, 10000, 10000);
     this.add.tileSprite(0, 0, this.physics.world.bounds.width, this.physics.world.bounds.height, 'background');
 
     this.cameras.main.width = gameWidth / 2;
@@ -48,43 +47,51 @@ export default class Game extends Phaser.Scene {
 
     this.game.snakes = [];
 
-    this.socket.on(SOCKET_EVENT.SERVER_TELL_PLAYER_TO_MOVE, (e) => {
-      const playerData = JSON.parse(e.text);
-      meTest = playerData;
-      console.log(playerData.circleSnake.length);
-      if (!isInitSnake) {
-        // Init Snake
-        const circleSnake = [...playerData.circleSnake];
-        const head = circleSnake.shift();
-
-        const snake = new Snake(this, head.x, head.y, 'circle');
-        snake.initSections(circleSnake);
-        this.game.playerSnake = snake;
-        isInitSnake = true;
-        this.cameras.main.startFollow(snake.head);
-        this.cameras.main.setLerp(0.3);
-        // this.cameras.main.setBounds(-gameWidth * 3 / 2, -gameHeight * 3 / 2, gameWidth * 3, gameHeight * 3);
-      }
-    });
-
     this.socket.on(SOCKET_EVENT.SERVER_UPDATE_ALL_PLAYERS, (e) => {
       const {
         data
-      } = JSON.parse(e.text);
-      otherPlayers = [...data];
+      } = JSON.parse(e);
+      meTest = data;
+      if (!isInitSnake) {
+        // Init Snake
+        data.forEach(snakeData => {
+          const circleSnake = [...snakeData.circleSnake];
+          const head = circleSnake.shift();
+          console.log(snakeData);
+          const snake = new Snake(this, head.x, head.y, 'circle');
+          snake.initSections(circleSnake);
+          if (snakeData.id === name) {
+            this.game.playerSnake = snake;
+            //this.cameras.main.setScroll(head.x - this.cameras.main.width / 2, head.y - this.cameras.main.height / 2)
+            this.cameras.main.startFollow(snake.head);
+          }
+          
+          this.cameras.main.setLerp(0.05);
+        });
+ 
+        isInitSnake = true;
+        this.physics.world.setBounds(-5000, -5000, 10000, 10000);
+      }
     });
 
-    this.socket.on(SOCKET_EVENT.SERVER_UPDATE_FOOD, (e) => {
-      const {
-        data
-      } = JSON.parse(e.text);
-      if (foodData.length !== data.length) {
-        foodData = [...data];
-        console.log(foodData);
-        getFood(this, foodData);
-      }
-    }
-    );
+    // this.socket.on(SOCKET_EVENT.SERVER_UPDATE_ALL_PLAYERS, (e) => {
+    //   const {
+    //     data
+    //   } = JSON.parse(e.text);
+    //   otherPlayers = [...data];
+    // });
+
+    // this.socket.on(SOCKET_EVENT.SERVER_UPDATE_FOOD, (e) => {
+    //   const {
+    //     data
+    //   } = JSON.parse(e.text);
+    //   if (foodData.length !== data.length) {
+    //     foodData = [...data];
+    //     //  console.log(foodData);
+    //     getFood(this, foodData);
+    //   }
+    // }
+    // );
     // plusRunes = new PowerRune(this, snake.head, 'plus', 10, { x: -100, y: -100 }, { x: 750, y: 550 });
     //  When the player sprite his the health packs, call this function ...
     // this.physics.add.overlap(snake.head, plusRunes.healthGroup, plusRunes.spriteHitHealth());
@@ -144,25 +151,18 @@ export default class Game extends Phaser.Scene {
   spriteHitHealth (sprite, health) {
     healthGroup.killAndHide(health);
   }
-
   update (time, delta) {
     if (isInitSnake) {
       // const { me } = getCurrentState()
-
       this.slot.update();
       for (let i = this.game.snakes.length - 1; i >= 0; i--) {
-        this.game.snakes[i].update(meTest);
+        this.game.snakes[i].update(meTest[i]);
       }
       const pointer = this.input.activePointer.updateWorldPoint(this.cameras.main);
-      const uid = getUID();
-      const event = {
-        GUID: uid.guid,
-        UUID: uid.uuid,
-        body: {
-          x: pointer.worldX,
-          y: pointer.worldY
-        }
-      };
+      const event = JSON.stringify({
+        x: pointer.worldX,
+        y: pointer.worldY
+      });
       this.socket.emit(SOCKET_EVENT.PLAYERSENDTARGET, event);
     }
   }
