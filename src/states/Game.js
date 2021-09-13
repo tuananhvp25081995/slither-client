@@ -83,6 +83,7 @@ export default class Game extends Phaser.Scene {
     );
     this.socket.on(SOCKET_EVENT.SERVER_REDUCE_FOOD, (e) => {
       const data = JSON.parse(e);
+      console.log('eat', data.Data);
     });
     // minimap
     const minimapSize = gameWidth / 20;
