@@ -16,7 +16,7 @@ let snake;
 let Circle;
 let healthGroup;
 let foodGroup;
-const foodData = [];
+let foodData = [];
 const flag = true;
 
 const RENDER_DELAY = 20;
@@ -74,57 +74,21 @@ export default class Game extends Phaser.Scene {
       }
     });
 
-    // this.socket.on(SOCKET_EVENT.SERVER_UPDATE_ALL_PLAYERS, (e) => {
-    //   const {
-    //     data
-    //   } = JSON.parse(e.text);
-    //   otherPlayers = [...data];
-    // });
-
-    // this.socket.on(SOCKET_EVENT.SERVER_UPDATE_FOOD, (e) => {
-    //   const {
-    //     data
-    //   } = JSON.parse(e.text);
-    //   if (foodData.length !== data.length) {
-    //     foodData = [...data];
-    //     //  console.log(foodData);
-    //     getFood(this, foodData);
-    //   }
-    // }
-    // );
-    // plusRunes = new PowerRune(this, snake.head, 'plus', 10, { x: -100, y: -100 }, { x: 750, y: 550 });
-    //  When the player sprite his the health packs, call this function ...
-    // this.physics.add.overlap(snake.head, plusRunes.healthGroup, plusRunes.spriteHitHealth());
-    //
-
-    // if (foodData) {
-    //   foodData.forEach(e => {
-    //     console.log(e)
-    //     // getFood(this, 'food', 1, foodData.Radius, { min: -foodData.X, max: foodData.X }, { min: -foodData.Y, max: foodData.Y });
-    //   });
-    // }
-    // healthGroup = this.physics.add.staticGroup({
-    //   key: 'plus',
-    //   frameQuantity: 10,
-    //   immovable: true,
-    //   setScale: {
-    //     x: 0.1, y: 0.1
-    //   }
-    // });
-
-    // const children = healthGroup.getChildren();
-
-    // for (let i = 0; i < children.length; i++) {
-    //   const x = Phaser.Math.Between(1000, 1750);
-    //   const y = Phaser.Math.Between(1000, 1550);
-
-    //   children[i].setPosition(x, y);
-    // }
-
-    // healthGroup.refresh();
-
-    //  When the player sprite hits the foods, call this function ...
-    // this.physics.add.overlap(snake.head, healthGroup, this.spriteHitHealth)
+    this.socket.on(SOCKET_EVENT.SERVER_UPDATE_FOOD, (e) => {
+      console.log('alo');
+      const {
+        data
+      } = JSON.parse(e);
+      console.log(data);
+      foodData = [...data];
+      getFood(this, foodData);
+    }
+    );
+    this.socket.on(SOCKET_EVENT.SERVER_REDUCE_FOOD, (e) => {
+      console.log(e);
+      const data = JSON.parse(e);
+      console.log(data.Data);
+    });
     // minimap
     const minimapSize = gameWidth / 20;
     this.minimap = this.cameras.add(this.cameras.main.width - minimapSize, this.cameras.main.height - minimapSize, minimapSize, minimapSize).setZoom(0.016);
@@ -184,6 +148,7 @@ function getFood (game, data) {
     const x = data[i].x;
     const y = data[i].y;
     childrenFood[i].setPosition(x, y);
+    childrenFood[i].setScale(data[i].Radius / 3);
   }
   foodGroup.refresh();
   // game.physics.add.overlap(snake.head, foodGroup, spriteHitFood);
