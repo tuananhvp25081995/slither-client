@@ -1,6 +1,7 @@
 import io from 'socket.io-client';
-const SOCKET_SERVER = 'ws://144.202.101.144:8080';
-// const SOCKET_SERVER = 'http://127.0.0.1:8080';
+const SOCKET_SERVER = 'ws://144.202.101.144:8080/';
+//const SOCKET_SERVER = 'http://127.0.0.1:8080/';
+// const SOCKET_SERVER = '';
 let socket;
 let UUID = '';
 let GUID = '';
@@ -10,7 +11,7 @@ const debug = function (args) {
   }
 };
 export const initWs = (nameSpace = '') => {
-  socket = io(`${SOCKET_SERVER}/${nameSpace}`, {
+  socket = io(`${SOCKET_SERVER}${nameSpace}`, {
     transports: ['websocket']
   });
 

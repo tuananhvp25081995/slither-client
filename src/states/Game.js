@@ -26,7 +26,6 @@ let firstServerTimestamp = 0;
 let isInitSnake = false;
 let meTest = {};
 
-let lastTimeUpdate = 0;
 export default class Game extends Phaser.Scene {
   preload () {
     this.socket = getWS();
@@ -63,6 +62,7 @@ export default class Game extends Phaser.Scene {
           snake.initSections(circleSnake);
           if (snakeData.id === name) {
             this.game.playerSnake = snake;
+            //this.cameras.main.setScroll(head.x - this.cameras.main.width / 2, head.y - this.cameras.main.height / 2)
             this.cameras.main.startFollow(snake.head);
           }
           
@@ -152,8 +152,6 @@ export default class Game extends Phaser.Scene {
     healthGroup.killAndHide(health);
   }
   update (time, delta) {
-    console.log(delta);
-    lastTimeUpdate = Date.now();
     if (isInitSnake) {
       // const { me } = getCurrentState()
       this.slot.update();
