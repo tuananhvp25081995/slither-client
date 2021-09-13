@@ -5,7 +5,7 @@ import {
 } from '../socket';
 import {
   SOCKET_EVENT
-} from '../contants';
+} from '../constants';
 
 export default class Login extends Phaser.Scene {
   preload () {

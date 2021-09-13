@@ -10,13 +10,13 @@ import CircleBorder from '../sprites/CircleBorder';
 import Leaderboard from '../sprites/Leaderboard';
 import {
   SOCKET_EVENT
-} from '../contants';
+} from '../constants';
 
 let snake;
 let Circle;
 let healthGroup;
 let foodGroup;
-let foodData = [];
+const foodData = [];
 const flag = true;
 
 const RENDER_DELAY = 20;
@@ -62,7 +62,7 @@ export default class Game extends Phaser.Scene {
           snake.initSections(circleSnake);
           if (snakeData.id === name) {
             this.game.playerSnake = snake;
-            //this.cameras.main.setScroll(head.x - this.cameras.main.width / 2, head.y - this.cameras.main.height / 2)
+            // this.cameras.main.setScroll(head.x - this.cameras.main.width / 2, head.y - this.cameras.main.height / 2)
             this.cameras.main.startFollow(snake.head);
           }
           
@@ -151,6 +151,7 @@ export default class Game extends Phaser.Scene {
   spriteHitHealth (sprite, health) {
     healthGroup.killAndHide(health);
   }
+
   update (time, delta) {
     if (isInitSnake) {
       // const { me } = getCurrentState()

@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import {
   SOCKET_EVENT
-} from '../contants';
+} from '../constants';
 import {
   getWS
 } from '../socket';

@@ -1,11 +1,7 @@
-import Phaser, {
-  Color
-} from 'phaser';
+import Phaser from 'phaser';
 // import EyePair from "./EyePair";
 // import Shadow from "./Shadow";
-import {
-  Util
-} from '../utils';
+
 let nickName;
 export default class extends Phaser.GameObjects.Sprite {
   constructor (scene, x, y, texture) {
@@ -82,8 +78,8 @@ export default class extends Phaser.GameObjects.Sprite {
     //   this.tweens.push(tween)
     // })
 
-    this.onDestroyedCallbacks = []
-    this.onDestroyedContexts = []
+    this.onDestroyedCallbacks = [];
+    this.onDestroyedContexts = [];
 
     // the edge is the front body that can collide with other snakes
     // it is locked to the head of this snake
@@ -168,7 +164,7 @@ export default class extends Phaser.GameObjects.Sprite {
     }
     const snakeSections = [...snakeDataUpdate.circleSnake];
     if (snakeSections.length > this.tweens.length) {
-      const section = snakeSections[snakeSections.length - 1]
+      const section = snakeSections[snakeSections.length - 1];
       this.addSectionAtPosition(section.x, section.y);
     }
     for (let i = 0; i < snakeSections.length; i++) {
