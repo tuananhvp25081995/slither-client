@@ -57,7 +57,6 @@ export default class Game extends Phaser.Scene {
         data.forEach(snakeData => {
           const circleSnake = [...snakeData.circleSnake];
           const head = circleSnake.shift();
-          console.log(snakeData);
           const snake = new Snake(this, head.x, head.y, 'circle');
           snake.initSections(circleSnake);
           if (snakeData.id === name) {
@@ -75,19 +74,15 @@ export default class Game extends Phaser.Scene {
     });
 
     this.socket.on(SOCKET_EVENT.SERVER_UPDATE_FOOD, (e) => {
-      console.log('alo');
       const {
         data
       } = JSON.parse(e);
-      console.log(data);
       foodData = [...data];
       getFood(this, foodData);
     }
     );
     this.socket.on(SOCKET_EVENT.SERVER_REDUCE_FOOD, (e) => {
-      console.log(e);
       const data = JSON.parse(e);
-      console.log(data.Data);
     });
     // minimap
     const minimapSize = gameWidth / 20;
