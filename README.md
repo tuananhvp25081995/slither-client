@@ -25,3 +25,14 @@
 ### socket: Chứa cấu hình socket
 
 ### main.js: Chứa các hàm khởi tạo game
+
+# Các vấn đề cần giải quyết:
+
+- Sửa food array theo data trả về từ server
+- Thêm các thành phần cho snake như name, eyes
+- Add data cho Leaderboard
+- Thêm data khởi tạo map
+- Thay đổi màu food dựa trên size
+- Màu rắn
+- Ghép data skill
+
