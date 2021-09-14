@@ -10,7 +10,7 @@ module.exports = {
     SERVER_SKILL_THROUGH: 'game:snake-through',
     SERVER_SKILL_INVISIBLE: 'game:snake-invisible',
     SERVER_SKILL_SUCK: 'game:snake-suck',
-    SERVER_SKILL_FEED: 'game:snake-feed',
+    SERVER_SKILL_SPEED: 'game:snake-speed',
     SERVER_SKILL_ZOOM: 'game:snake-zoom'
   }
 };

@@ -1,7 +1,10 @@
 import {
   SOCKET_EVENT
 } from '../contants';
-
+import {
+  getWS
+} from '../socket';
+let socket;
 export default class Slot {
   constructor (scene, x, y) {
     this.scene = scene;
@@ -14,48 +17,57 @@ export default class Slot {
     this.skill4 = this.scene.add.image(this.skill3.x + +this.skill3.width + 10, this.y, 'skill4').setScrollFactor(0, 0);
 
     this.keys = this.scene.input.keyboard.addKeys('Q,W,E,R');
-  }
 
-  activeSkill () {
-    if (this.alpha !== 1) this.setAlpha(1);
+    const cooldown1 = 15000;
+    const cooldown2 = 15000;
+    const cooldown3 = 15000;
+    const cooldown4 = 15000;
+
+    socket = getWS();
+
+    this.keys.Q.on('down', () => {
+      socket.emit(SOCKET_EVENT.USE_SKILL, JSON.stringify({
+        tag: 'invisible'
+      }));
+      this.cooldownSkill(this.keys.Q, cooldown1, this.skill1);
+    });
+    this.keys.W.on('down', () => {
+      socket.emit(SOCKET_EVENT.USE_SKILL, JSON.stringify({
+        tag: 'through'
+      }));
+      this.cooldownSkill(this.keys.W, cooldown2, this.skill2);
+    });
+    this.keys.E.on('down', () => {
+      socket.emit(SOCKET_EVENT.USE_SKILL, JSON.stringify({
+        tag: 'zoom'
+      }));
+      this.cooldownSkill(this.keys.E, cooldown3, this.skill3);
+    });
+    this.keys.R.on('down', () => {
+      socket.emit(SOCKET_EVENT.USE_SKILL, JSON.stringify({
+        tag: 'suck'
+      }));
+      this.cooldownSkill(this.keys.R, cooldown4, this.skill4);
+    });
   }
 
   update () {
-    if (this.keys.Q.isDown) {
-      this.scene.socket.emit(SOCKET_EVENT.USE_SKILL, JSON.stringify({
-        tag: 'invisible'
+    if (this.scene.input.activePointer.leftButtonDown()) {
+      console.log('speeding...');
+      socket.emit(SOCKET_EVENT.USE_SKILL, JSON.stringify({
+        tag: 'speed'
       }));
-      this.skill1.setAlpha(0.5);
-      this.scene.time.addEvent({
-        delay: 3000, callback: this.activeSkill, callbackScope: this.skill1
-      });
     }
-    if (this.keys.W.isDown) {
-      this.scene.socket.emit(SOCKET_EVENT.USE_SKILL, JSON.stringify({
-        tag: 'through'
-      }));
-      this.skill2.setAlpha(0.5);
-      this.scene.time.addEvent({
-        delay: 3000, callback: this.activeSkill, callbackScope: this.skill2
-      });
-    }
-    if (this.keys.E.isDown) {
-      this.scene.socket.emit(SOCKET_EVENT.USE_SKILL, JSON.stringify({
-        tag: 'feed'
-      }));
-      this.skill3.setAlpha(0.5);
-      this.scene.time.addEvent({
-        delay: 3000, callback: this.activeSkill, callbackScope: this.skill3
-      });
-    }
-    if (this.keys.R.isDown) {
-      this.scene.socket.emit(SOCKET_EVENT.USE_SKILL, JSON.stringify({
-        tag: 'suck'
-      }));
-      this.skill4.setAlpha(0.5);
-      this.scene.time.addEvent({
-        delay: 3000, callback: this.activeSkill, callbackScope: this.skill4
-      });
-    }
+  }
+
+  cooldownSkill (key, timeout, skill) {
+    key.enabled = false;
+    console.log(`${key} is disabled`);
+    skill.setAlpha(0.5);
+    setTimeout(() => {
+      key.reset();
+      console.log(`${key} is now off cooldown`);
+      skill.setAlpha(1);
+    }, timeout);
   }
 }

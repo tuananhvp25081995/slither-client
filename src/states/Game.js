@@ -98,28 +98,28 @@ export default class Game extends Phaser.Scene {
     // }
     // );
 
-    this.socket.on(SOCKET_EVENT.SERVER_SKILL_FEED, (e) => {
-      const data = JSON.parse(e.text);
-      console.log('feed', data);
+    this.socket.on(SOCKET_EVENT.SERVER_SKILL_SPEED, (e) => {
+      const data = JSON.parse(e);
+      console.log('speed', data);
     });
 
     this.socket.on(SOCKET_EVENT.SERVER_SKILL_INVISIBLE, (e) => {
-      const data = JSON.parse(e.text);
+      const data = JSON.parse(e);
       console.log('invisible', data);
     });
 
     this.socket.on(SOCKET_EVENT.SERVER_SKILL_SUCK, (e) => {
-      const data = JSON.parse(e.text);
+      const data = JSON.parse(e);
       console.log('suck', data);
     });
 
     this.socket.on(SOCKET_EVENT.SERVER_SKILL_THROUGH, (e) => {
-      const data = JSON.parse(e.text);
+      const data = JSON.parse(e);
       console.log('through', data);
     });
 
     this.socket.on(SOCKET_EVENT.SERVER_SKILL_ZOOM, (e) => {
-      const data = JSON.parse(e.text);
+      const data = JSON.parse(e);
       console.log('zoom', data);
     });
     // plusRunes = new PowerRune(this, snake.head, 'plus', 10, { x: -100, y: -100 }, { x: 750, y: 550 });
@@ -197,6 +197,7 @@ export default class Game extends Phaser.Scene {
   update(time, delta) {
     if (isInitSnake) {
       // const { me } = getCurrentState()
+
       this.slot.update();
       for (let i = this.game.snakes.length - 1; i >= 0; i--) {
         this.game.snakes[i].update(meTest[i]);
