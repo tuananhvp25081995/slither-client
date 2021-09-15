@@ -49,24 +49,29 @@ export default class Slot {
       }));
       this.cooldownSkill(this.keys.R, cooldown4, this.skill4);
     });
-  }
-
-  update () {
-    if (this.scene.input.activePointer.leftButtonDown()) {
-      console.log('speeding...');
-      socket.emit(SOCKET_EVENT.USE_SKILL, JSON.stringify({
-        tag: 'speed'
-      }));
-    }
+    this.scene.input.on('pointerdown', (pointer) => {
+      if (pointer.leftButtonDown()) {
+        console.log('speeding...');
+        socket.emit(SOCKET_EVENT.USE_SKILL, JSON.stringify({
+          tag: 'speed', active: true
+        }));
+      }
+    });
+    this.scene.input.on('pointerup', (pointer) => {
+      if (pointer.leftButtonReleased()) {
+        console.log('No speed');
+        socket.emit(SOCKET_EVENT.USE_SKILL, JSON.stringify({
+          tag: 'speed', active: false
+        }));
+      }
+    });
   }
 
   cooldownSkill (key, timeout, skill) {
     key.enabled = false;
-    console.log(`${key} is disabled`);
     skill.setAlpha(0.5);
     setTimeout(() => {
       key.reset();
-      console.log(`${key} is now off cooldown`);
       skill.setAlpha(1);
     }, timeout);
   }

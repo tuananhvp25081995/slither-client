@@ -100,7 +100,7 @@ export default class Game extends Phaser.Scene {
 
     this.socket.on(SOCKET_EVENT.SERVER_SKILL_SPEED, (e) => {
       const data = JSON.parse(e);
-      console.log('speed', data);
+      // console.log('speed', data);
     });
 
     this.socket.on(SOCKET_EVENT.SERVER_SKILL_INVISIBLE, (e) => {
@@ -198,7 +198,7 @@ export default class Game extends Phaser.Scene {
     if (isInitSnake) {
       // const { me } = getCurrentState()
 
-      this.slot.update();
+      // this.slot.update();
       for (let i = this.game.snakes.length - 1; i >= 0; i--) {
         this.game.snakes[i].update(meTest[i]);
       }
