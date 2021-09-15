@@ -165,7 +165,7 @@ export default class extends Phaser.GameObjects.Sprite {
     const snakeSections = [...snakeDataUpdate.circleSnake];
     if (snakeSections.length > this.tweens.length) {
       const section = snakeSections[snakeSections.length - 1];
-      this.addSectionAtPosition(section.x, section.y);
+      // this.addSectionAtPosition(section.x, section.y);
     }
     for (let i = 0; i < snakeSections.length; i++) {
       // this.sections[i].body.x = snakeSections[i].x;
