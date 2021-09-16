@@ -9,6 +9,7 @@ module.exports = {
     SERVER_REDUCE_FOOD: 'game:foods-reduce',
     SERVER_UPDATE_POWER: 'game:skills-received',
     SERVER_UPDATE_BOUNDARY: 'game:boundary-received',
+    SERVER_UPDATE_MAP: 'game:size-map-received',
     USE_SKILL: 'use_skill',
     SERVER_SKILL_THROUGH: 'game:snake-through',
     SERVER_SKILL_INVISIBLE: 'game:snake-invisible',

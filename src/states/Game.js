@@ -40,14 +40,28 @@ export default class Game extends Phaser.Scene {
     // Always add map first. Everything else is added after map.
     const gameWidth = this.game.config.width;
     const gameHeight = this.game.config.height;
-    this.physics.world.setBounds(-5000, -5000, 10000, 10000);
-    this.add.tileSprite(
-      0,
-      0,
-      this.physics.world.bounds.width,
-      this.physics.world.bounds.height,
-      'background'
-    );
+
+    this.socket.on(SOCKET_EVENT.SERVER_UPDATE_MAP, (e) => {
+      const data = JSON.parse(e);
+      this.physics.world.setBounds(-data / 2, -data / 2, data, data);
+      this.add.tileSprite(
+        0,
+        0,
+        this.physics.world.bounds.width,
+        this.physics.world.bounds.height,
+        'background'
+      );
+    });
+    this.socket.on(SOCKET_EVENT.SERVER_UPDATE_BOUNDARY, (e) => {
+      const data = JSON.parse(e);
+      Circle = new CircleBorder(this, data.Radius, data.x, data.y
+      );
+      // Circle.resize(1000, 0.3);
+    });
+
+    // this.physics.world.setBounds(-5000, -5000, 10000, 10000);
+
+    // resize Circle
 
     this.cameras.main.width = gameWidth / 2;
     this.cameras.main.height = gameHeight / 2;
@@ -76,7 +90,6 @@ export default class Game extends Phaser.Scene {
         });
 
         isInitSnake = true;
-        this.physics.world.setBounds(-5000, -5000, 10000, 10000);
       }
     });
 
@@ -153,19 +166,8 @@ export default class Game extends Phaser.Scene {
         minimapSize,
         minimapSize
       )
-      .setZoom(0.016);
+      .setZoom(0.012);
     this.minimap.setBackgroundColor(0xffffff);
-
-    // create Circle
-    // Circle = CircleBorder.createCircle(this, gameWidth / 2)
-
-    Circle = new CircleBorder(this, gameWidth / 2, {
-      x: -gameWidth / 2,
-      y: -gameHeight / 2
-    });
-
-    // resize Circle
-    Circle.resize(5000, 0.75);
 
     // slot
     this.slot = new Slot(

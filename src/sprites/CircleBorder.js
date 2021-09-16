@@ -1,10 +1,15 @@
 import Phaser from 'phaser';
 
 export default class extends Phaser.GameObjects.Graphics {
-  constructor (scene, radius, options) {
+  constructor (scene, radius, x, y) {
+    const realX = x - radius;
+    const realY = y - radius;
+    const options = {
+      x: realX, y: realY
+    };
     super(scene, options);
 
-    this.lineStyle(5, 0x00ffff);
+    this.lineStyle(10, 0x00ffff);
     scene.add.existing(this);
     scene.physics.add.existing(this);
 

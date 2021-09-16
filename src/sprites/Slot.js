@@ -1,6 +1,6 @@
 import {
   SOCKET_EVENT
-} from '../contants';
+} from '../constants';
 import {
   getWS
 } from '../socket';
@@ -13,16 +13,16 @@ export default class Slot {
 
     this.skill1 = this.scene.add
       .image(this.x, this.y, 'skill1')
-      .setScrollFactor(0, 0);
+      .setScrollFactor(0, 0).setDepth(1);
     this.skill2 = this.scene.add
       .image(this.skill1.x + +this.skill1.width + 10, this.y, 'skill2')
-      .setScrollFactor(0, 0);
+      .setScrollFactor(0, 0).setDepth(1);
     this.skill3 = this.scene.add
       .image(this.skill2.x + +this.skill2.width + 10, this.y, 'skill3')
-      .setScrollFactor(0, 0);
+      .setScrollFactor(0, 0).setDepth(1);
     this.skill4 = this.scene.add
       .image(this.skill3.x + +this.skill3.width + 10, this.y, 'skill4')
-      .setScrollFactor(0, 0);
+      .setScrollFactor(0, 0).setDepth(1);
 
     this.keys = this.scene.input.keyboard.addKeys('Q,W,E,R');
 
