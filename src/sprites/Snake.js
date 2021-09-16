@@ -4,7 +4,7 @@ import Phaser from 'phaser';
 
 let nickName;
 export default class extends Phaser.GameObjects.Sprite {
-  constructor (scene, x, y, texture) {
+  constructor (scene, x, y, texture, snakeName) {
     super(scene, x, y, texture);
     // this.anchor.setTo(0.5)
 
@@ -18,7 +18,7 @@ export default class extends Phaser.GameObjects.Sprite {
     this.spriteKey = texture;
 
     // various quantities
-    this.scale = 0.6;
+    this.scale = 0.5;
     this.fastSpeed = 200;
     this.slowSpeed = 130;
     this.speed = this.slowSpeed;
@@ -42,7 +42,7 @@ export default class extends Phaser.GameObjects.Sprite {
     this.sectionGroup = this.scene.add.container(0, 0);
     // add nick name
     // nickName = localStorage.getItem('username')
-    this.textPosition = this.scene.add.text(x, y, nickName, {
+    this.textPosition = this.scene.add.text(x, y, snakeName, {
       fontFamily: 'sans-serif',
       fontSize: '20px',
       color: '#fff'
@@ -120,7 +120,7 @@ export default class extends Phaser.GameObjects.Sprite {
   addSectionAtPosition (x, y) {
     // init new section
     const sec = this.scene.physics.add.sprite(x, y, this.spriteKey);
-
+    console.log(sec);
     this.snakeLength++;
     this.sectionGroup.add(sec);
     this.sectionGroup.sendToBack(sec);
@@ -170,7 +170,9 @@ export default class extends Phaser.GameObjects.Sprite {
     for (let i = 0; i < snakeSections.length; i++) {
       // this.sections[i].body.x = snakeSections[i].x;
       // this.sections[i].body.y = snakeSections[i].y;
-
+      if (i === 0) {
+        this.textPosition.setPosition(snakeSections[i].x, snakeSections[i].y);
+      }
       this.tweens[i]?.play();
       if (this.tweens[i] && this.tweens[i].isPlaying() && snakeSections[i]) {
         this.tweens[i].updateTo('x', snakeSections[i].x, true);

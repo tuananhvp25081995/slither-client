@@ -23,6 +23,7 @@ export default class Countdown extends Phaser.Scene {
       } = JSON.parse(e);
       self.notice.setText(Data);
       if (Data.includes('Match start after 0 Minutes, 1 Seconds')) {
+        self.notice.setText(Data);
         self.scene.start('game');
       }
     });

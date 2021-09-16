@@ -10,6 +10,7 @@ export default {
     default: 'arcade',
     arcade: {
       gravity: false
+      // debug: true
     }
   },
   parent: 'content',
