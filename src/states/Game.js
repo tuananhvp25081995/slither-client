@@ -17,6 +17,8 @@ let Circle;
 let healthGroup;
 let foodGroup;
 let foodData = [];
+let powerGroup;
+const powerData = [];
 const flag = true;
 
 const RENDER_DELAY = 20;
@@ -77,14 +79,31 @@ export default class Game extends Phaser.Scene {
       const {
         data
       } = JSON.parse(e);
+      console.log(data);
       foodData = [...data];
       getFood(this, foodData);
     }
     );
     this.socket.on(SOCKET_EVENT.SERVER_REDUCE_FOOD, (e) => {
       const data = JSON.parse(e);
-      console.log('eat', data.Data);
+      const childrenFood = foodGroup.getChildren();
+      for (let i = 0; i < childrenFood.length; i++) {
+        const x = data.Data.x;
+        const y = data.Data.y;
+        if (childrenFood[i].x === x && childrenFood[i].y === y) {
+          foodGroup.killAndHide(childrenFood[i]);
+        }
+      }
+      foodGroup.refresh();
     });
+
+    // this.socket.on(SOCKET_EVENT.SERVER_UPDATE_POWER, (e) => {
+    //   const data = JSON.parse(e);
+    //   console.log(data)
+    //   powerData = data.map(item =>{
+    //     return []
+    //   });
+    // });
     // minimap
     const minimapSize = gameWidth / 20;
     this.minimap = this.cameras.add(this.cameras.main.width - minimapSize, this.cameras.main.height - minimapSize, minimapSize, minimapSize).setZoom(0.016);
@@ -149,6 +168,11 @@ function getFood (game, data) {
   foodGroup.refresh();
   // game.physics.add.overlap(snake.head, foodGroup, spriteHitFood);
 }
+// function getPower(game, data){
+//   powerGroup = game.physics.add.staticGroup({
+
+//   });
+// }
 // destroy food
 function spriteHitFood (sprite, health) {
   // foodGroup.killAndHide(health)
