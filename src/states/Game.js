@@ -169,6 +169,9 @@ export default class Game extends Phaser.Scene {
       }
       powerGroup.refresh();
     });
+    this.socket.on(SOCKET_EVENT.PLAYERDIE, (e) => {
+      this.scene.start('login');
+    });
     // minimap
     const minimapSize = gameWidth / 20;
     this.minimap = this.cameras
