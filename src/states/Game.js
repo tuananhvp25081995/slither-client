@@ -64,7 +64,7 @@ export default class Game extends Phaser.Scene {
 
     this.cameras.main.width = gameWidth / 2;
     this.cameras.main.height = gameHeight / 2;
-    this.cameras.main.setZoom(1.5);
+    // this.cameras.main.setZoom(1.5);
     this.game.snakes = [];
 
     this.socket.on(SOCKET_EVENT.SERVER_UPDATE_ALL_PLAYERS, (e) => {
